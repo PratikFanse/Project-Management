@@ -1,0 +1,6 @@
+.custom-login{
+    border-radius: 5% !important;
+}
+#password-helper-text, #email-helper-text{
+    margin-left: 0!important;
+}
