@@ -7,11 +7,13 @@ import { AuthModule } from '../../auth/auth.module';
 import { JwtAuthGuard } from '../../auth/jwt/jwt-auth.guard';
 import { RolesGaurd } from '../../auth/role/roles.guard';
 import { ConfigModule } from '@nestjs/config';
+import { OtpModule } from 'src/auth/otp/otp.module';
 @Module({
   imports: [ 
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.DATABASE_CONNECTION),
     AuthModule,
+    OtpModule
    ],
   controllers: [AppController],
   providers: [

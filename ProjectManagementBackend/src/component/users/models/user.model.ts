@@ -1,4 +1,4 @@
-import * as mongoose from'mongoose';
+import * as mongoose from 'mongoose';
 
 export const UserScema = new mongoose.Schema({
     email: { type: String, required:true, unique:true },
@@ -7,11 +7,11 @@ export const UserScema = new mongoose.Schema({
     role: {type: String, required: true, enum: ['admin','manager','QA', 'employee']},
     isActive: Boolean,
     acceptedBy:{type:Object, ref:'User'},
-    createAt:{type: Date, default: Date.now},
-    updatedAt:Date,
+    // createdAt:{type: Date, default: Date.now},
+    // updatedAt:Date,
     deletedAt:Date,
     deletedBy:{type:Object, ref:'User'}
-});
+}, {timestamps:true});
 
 export interface User{
     id: number ;

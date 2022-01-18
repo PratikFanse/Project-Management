@@ -1,13 +1,18 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Global, Module } from '@nestjs/common';
 // import { DatabaseModule } from 'src/auth/db/database.module';
 import { UserService } from './user.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserScema } from './models/user.model';
 import { UserController } from './user.controller';
 import { AuthModule } from 'src/auth/auth.module';
+import { OTPService } from 'src/auth/otp/otp.service';
+import { OtpModule } from 'src/auth/otp/otp.module';
 
+@Global()
 @Module({
-  imports:[forwardRef(() => AuthModule), MongooseModule.forFeature([{name:'User', schema: UserScema}])],
+  imports:[forwardRef(() => AuthModule), 
+    MongooseModule.forFeature([{name:'User', schema: UserScema}]),
+],
   providers: [UserService],
   exports: [UserService],
   controllers: [UserController],

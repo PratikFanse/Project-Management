@@ -6,12 +6,14 @@ import { Roles } from 'src/auth/role/roles.decorator';
 import { Public } from 'src/auth/role/roles.guard';
 import { UserService } from './user.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { OTPService } from 'src/auth/otp/otp.service';
+import { ResetPassword } from './models/resetPassword.model';
 
 
 @Controller('user')
 export class UserController {
 
-    constructor(private authService: AuthService, private userService: UserService){}
+    constructor(private authService: AuthService, private userService: UserService, private otpService:OTPService){}
 
     @Post('signin')
     @Public()
@@ -47,9 +49,23 @@ export class UserController {
       return req.user;
     }
 
+    @Public()
     @Get('accountRequest')
-    @Roles(Role.Admin)
-    getAccountRequest(){
-      return 
+    // @Roles(Role.Admin)
+    getAccountRequest(@Req() req){
+      console.log(req.query)
+      return this.userService.findAllRequest()
+    }
+
+    @Public()
+    @Post('forgotPassword')
+    sendOtpServices(@Req() req){
+      return this.otpService.sendOTP(req.body.email)
+    }
+
+    @Public()
+    @Post('setNewPassword')
+    setNewPassword(@Body() resetPassword: ResetPassword){
+      return this.userService.setNewPassword(resetPassword)
     }
 }
