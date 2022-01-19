@@ -1,31 +1,17 @@
 import './App.css';
-import { Link } from 'react-router-dom';
-import Login from '../Authentication/Login/Login'
-import { Route, Routes} from 'react-router-dom';
 import cookie from 'js-cookie';
+import PublicApp from '../Public/Public.App';
 function App() {
-  const page = () =>{
-    if(cookie.get('access_token')){ 
-      return <Routes>
-        <Route path="/login" exact element={<Login test="test props"/>}/>
-      </Routes>
-      } else {
-        window.history.pushState({},'','/login')
-        return <Login/>;
+  const renderApp = () =>{
+    if(cookie.get('access_token')){ } else {
+        return <PublicApp/>
       }
   }
-  
   
   return (
     <div className="App">
       <header className="App-header">
-        <Link to='/login'>Login</Link> 
-        {/* <Login></Login> */}
-        {page()}
-          {/* <Routes> */}
-            {/* <Route path="/" exact element={<App/>} /> */}
-            {/* <Route path="/login" exact element={<Login test="test props"/>}/>
-          </Routes> */}
+        {renderApp()}
       </header>
     </div>
   );

@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { Role } from 'src/auth/role/role.enum';
 import { OTPService } from 'src/auth/otp/otp.service';
 import { ResetPassword } from './models/resetPassword.model';
+import { NewUser } from './models/newUser.model';
 
 @Injectable()
 export class UserService {
@@ -18,17 +19,18 @@ export class UserService {
     return await this.User.find().exec();
   }
 
-  async createNewUser(user: any) {
+  async createNewUser(user: NewUser) {
     if(!(await this.User.findOne({email: user.email}).exec() as User)){
       try{
         const passwordHash = await this.encrypt(user.password);
         const newUser = new this.User({
-          email: user.email, 
+          email: user.email.toLocaleLowerCase(), 
           username: user.username, 
-          password:passwordHash, 
-          role: Role.Employee
+          password:passwordHash,
+          birthDate: user.dob
         })
-        return await newUser.save() ? true : false
+        console.log(newUser)
+        return {isCreated: await newUser.save() ? true : false}
       } catch(e){
         throw new BadRequestException();
       };
@@ -42,9 +44,10 @@ export class UserService {
     if(await this.validateText(resetPassword.email, resetPassword.userToken)){
       if(await this.otpService.validateOTP(resetPassword.userToken,resetPassword.otp)){
         const user = await this.User.findOne({email:resetPassword.email}).exec();
-        user.password = resetPassword.newPass;
+        user.password = await this.encrypt(resetPassword.newPass);
         try{
           await user.save();
+          return {isPasswordReset:true};
         } catch(e){
           throw new BadRequestException();
         }
@@ -68,7 +71,8 @@ export class UserService {
         username:user.username,
         email:user.email,
         password:user.password,
-        role:user.role
+        role:user.role,
+        birthDate: user.birthDate
       }
       return user;
     } catch(e){

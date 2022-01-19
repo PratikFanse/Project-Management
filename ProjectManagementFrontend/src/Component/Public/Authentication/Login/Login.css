@@ -1,0 +1,10 @@
+.otherAction{
+    font-size: 0.875rem;
+    margin: 0 23px 23px !important;
+}
+.otherAction a{
+    color: #1976d2 !important;
+}
+.otherAction a:hover{
+    text-decoration: underline !important;
+}

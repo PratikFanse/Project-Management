@@ -8,6 +8,7 @@ import { UserService } from './user.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { OTPService } from 'src/auth/otp/otp.service';
 import { ResetPassword } from './models/resetPassword.model';
+import { NewUser } from './models/newUser.model';
 
 
 @Controller('user')
@@ -24,7 +25,7 @@ export class UserController {
     @Public()
     @Post('login')
     async login(@Req() req: Request, @Res({passthrough:true}) res:Response) {
-      console.log('login',req.body)
+      console.log('login',req.body.email)
       const user = await this.authService.validateUser(req.body.email, req.body.password);
       if (!user) {
         throw new UnauthorizedException();
@@ -64,8 +65,14 @@ export class UserController {
     }
 
     @Public()
-    @Post('setNewPassword')
+    @Post('resetPassword')
     setNewPassword(@Body() resetPassword: ResetPassword){
       return this.userService.setNewPassword(resetPassword)
+    }
+
+    @Public()
+    @Post('signUp')
+    signUp(@Body() newUser: NewUser){
+      return this.userService.createNewUser(newUser);
     }
 }

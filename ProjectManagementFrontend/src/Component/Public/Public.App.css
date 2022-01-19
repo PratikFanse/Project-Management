@@ -1,0 +1,23 @@
+.MuiFormHelperText-root{
+    margin-left: 0;
+}
+.loginError,.sendOTPError{
+    margin: 0 7px !important;
+}
+.formModel{
+    border-radius: 5% !important;
+    max-width: min-content;
+    margin: auto;
+    padding: 10px;
+}
+.publicScreen{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.buttonLoader{
+    margin-left: 40px !important;
+    margin-top: 6px !important;
+}
