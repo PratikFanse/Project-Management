@@ -74,7 +74,6 @@ export default function Signup(props){
                 email: form.email.value,
                 password: form.password.value
             }
-            console.log(newUser)
             axios.post('/user/signup',newUser)
                 .then(response =>{
                     if(response.data.isCreated){
@@ -82,7 +81,6 @@ export default function Signup(props){
                     } else {
                         setHelperText({...helperText,email:response.data.msg})
                         setValidation({...validation,isEmailExist:true,isAttempted:true})
-                        console.log(validation)
                     }
                 })
         } else{

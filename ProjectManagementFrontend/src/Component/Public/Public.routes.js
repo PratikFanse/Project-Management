@@ -9,8 +9,8 @@ export default function PublicRoutes(props){
         <Routes> 
             <Route path="/login" exact element={<Login/>}/>
             <Route path="/signup" exact element={<Signup/>}/>
-            <Route path="/forgotPassword" exact element={<ForgotPassword/>}/>
-            <Route path="/resetPassword" exact element={<ResetPassword/>}/>
+            <Route path="/forgotPassword" exact element={<ForgotPassword  notification={props.notifyOTP}/>}/>
+            <Route path="/resetPassword" exact element={<ResetPassword notification={props.passChanged}/>}/>
         </Routes>
     )
 }

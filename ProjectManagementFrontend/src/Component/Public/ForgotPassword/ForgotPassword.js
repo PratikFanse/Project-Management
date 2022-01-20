@@ -1,4 +1,4 @@
-import { Button, Card, CardActions, CardContent, CircularProgress, FormControl, FormHelperText, IconButton, Input, InputAdornment, InputLabel, Stack, TextField, Typography } from "@mui/material";
+import { Button, Card, CardActions, CardContent, CircularProgress, FormHelperText, Stack, TextField, Typography } from "@mui/material";
 import { green } from "@mui/material/colors";
 import { Box } from "@mui/system";
 import axios from "axios";
@@ -40,12 +40,13 @@ export default function ForgotPassword(props){
                 .then(response =>{
                     setSuccess(true);
                     setLoading(false);
+                    props.notification()
                     setUserToken({email:form.email.value,token: response.data})
+                    // navigate('/login')
                     resetElement.click()
                 }).catch( (err)=>{
                     setLoading(false);
                     setValidation({...validation, isEmailExist:false} );
-                    console.log(validation)
                 })
         } else{
             setValidation({...validation, isAttempted:true});

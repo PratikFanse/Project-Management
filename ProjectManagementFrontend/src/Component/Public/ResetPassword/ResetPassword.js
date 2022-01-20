@@ -4,23 +4,22 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { FormControl, FormHelperText, Grid, Input, IconButton,InputAdornment, InputLabel, TextField } from '@mui/material';
+import { FormControl, FormHelperText, Input, IconButton,InputAdornment, InputLabel, TextField } from '@mui/material';
 import Stack from '@mui/material/Stack';
-import { Link, Route, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import validator from 'validator';
 import axios from 'axios';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import React, { useEffect, useState } from 'react';
-import NumberFormat from 'react-number-format';
+import React, { useEffect } from 'react';
 axios.defaults.withCredentials = true
-export default function ResetPassword(){
+export default function ResetPassword(props){
     const userToken = useLocation().state
-    const [loginElement,setLoginElement] = new React.useState(null)
+    const navigate = useNavigate()
     useEffect(()=>{
-        if(!userToken && loginElement)
-            loginElement.click()
-        },[loginElement])  
+        if(!userToken)
+            navigate('/login')
+        })  
     const [validation, setValidation] = new React.useState({
         isStrongPassword:false,
         isAttempted:false,
@@ -39,7 +38,6 @@ export default function ResetPassword(){
         confPass:"Entered password do not match.",
     });
     const validateInput=(ev)=>{
-        console.log(validation)
         const validations = {...validation}
         if(ev.target.name!='otp')
             setInputValues({...inputValues,[ev.target.name]: ev.target.value});
@@ -75,8 +73,10 @@ export default function ResetPassword(){
             }
             axios.post('/user/resetPassword',newPassword)
                 .then(response =>{
-                    if(response.data.isPasswordReset)
-                        loginElement.click()
+                    if(response.data.isPasswordReset){
+                        props.notification()
+                        navigate('/login')
+                    }
                 }).catch( ()=>{
                     setValidation({...validation, isValidOTP:false} );
                 })
@@ -154,7 +154,7 @@ export default function ResetPassword(){
                 <CardActions sx={{mx:2,mb:2}}>
                     <Stack direction="row" spacing={2}>
                         <Button type='submit' variant="contained">Reset Password</Button>
-                        <Link to='/login' ref={input => setLoginElement(input)}><Button variant="text">Log In</Button></Link>  
+                        <Link to='/login'><Button variant="text">Log In</Button></Link>  
                     </Stack>
                 </CardActions>
             </Box>
