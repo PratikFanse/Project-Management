@@ -1,19 +1,21 @@
 import './App.css';
 import cookie from 'js-cookie';
-import PublicApp from '../Public/Public.App';
-import MainApp from '../MainApp/Main.App';
+import PublicApp from '../Public/Public.app';
+import MainApp from '../MainApp/Main.app';
+import React from 'react';
 function App() {
-  const renderApp = () =>{
-    if(cookie.get('access_token')){
-        return<MainApp/>
+    const [renderApp, setRenderApp] = React.useState(null)
+    React.useEffect(()=>{
+      if(cookie.get('access_token')){
+        setRenderApp(<MainApp/>)
      } else {
-        return <PublicApp/>
+        setRenderApp(<PublicApp/>)
       }
-  }
+    },[])
   
   return (
     <div className="App">
-        {renderApp()}
+      {renderApp}
     </div>
   );
 }

@@ -47,8 +47,7 @@ export default function Login(props){
             // axios.get('/user/logout')
             axios.post('/user/login',cred)
                 .then(response =>{
-                    // localStorage.setItem('access_token',response.data.access_token)
-                    // console.log(response)
+                    window.location.reload();
                 }).catch( ()=>{
                     // const validations = {...validation};
                     // validations.isValidCred = false;

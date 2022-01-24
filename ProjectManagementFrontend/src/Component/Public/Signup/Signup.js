@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 import { FormControl, FormHelperText, Grid, IconButton, Input, InputAdornment, InputLabel, TextField } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import './Signup.css';
-import { Link, Route } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import validator from 'validator';
 import axios from 'axios';
 import LocalizationProvider from '@mui/lab/LocalizationProvider'

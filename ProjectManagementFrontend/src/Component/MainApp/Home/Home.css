@@ -1,0 +1,15 @@
+.todoList{
+    border-radius: 12px;
+    margin: 20px !important;
+    background: white;
+}
+.addTask{
+    float: right;
+}
+.addTask button{
+    top:-56px
+}
+.todoDetails{
+    margin: auto;
+    text-align: center;
+}

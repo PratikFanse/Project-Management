@@ -1,10 +1,9 @@
-import { Alert, Card, Grid, Slide, Snackbar, Typography } from "@mui/material"
-import { Box } from "@mui/system"
+import React from "react"
+import { Alert, Grid, Slide, Snackbar, Typography } from "@mui/material"
 import { useLocation } from "react-router"
 import Login from "./Authentication/Login/Login"
 import PublicRoutes from "./Public.routes"
 import './Public.App.css'
-import React from "react"
 
 export default function PublicApp(props){
     const currentRoute = useLocation().pathname

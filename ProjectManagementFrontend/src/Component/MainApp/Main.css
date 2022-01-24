@@ -1,0 +1,16 @@
+.sideNav{
+    width: 210px;
+    position:sticky;
+    height: 96vh;
+    padding: 15px 15px 15px 0;
+    /* background-color: whitesmoke; */
+}
+.mainApp{
+    display: flex;
+    width: 100%;
+    background-color: whitesmoke;
+}
+.mainAppHeader{
+    height: min-content;
+    border-bottom:2px solid gainsboro ;
+}

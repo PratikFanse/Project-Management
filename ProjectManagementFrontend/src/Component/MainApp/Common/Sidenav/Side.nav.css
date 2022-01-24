@@ -1,0 +1,26 @@
+.sideNavContainer{
+    border-radius: 7%/2%;
+    border-radius: 0 10px 10px 0;
+    height: 96vh;
+    background-color: #282c34;
+    width: 100%;
+    box-shadow: 5px 0px 10px #525a6ca3;
+}
+.sideNavItem, .sideNavItem svg,.sideNavItem span {
+    transform: translate3d(0px, 0px, 0px);
+    transition-duration: 0.2s;
+    color: whitesmoke;
+    font-weight: 500 !important;
+}
+.sideNavItem .MuiListItemIcon-root{
+    min-width: 45px;
+}
+
+.sideNavItem:hover,.active .sideNavItem{
+    transform: translate3d(2px, 0px, 0px);
+    transition-duration: 0.2s;
+    box-shadow: 1px 3px 2px #2525255c;
+    border-radius: 0 15px 15px 0;
+    /* margin: 2px 0; */
+    background-color: #373c48;
+}
