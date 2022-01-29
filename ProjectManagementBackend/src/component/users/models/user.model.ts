@@ -15,7 +15,7 @@ export const UserScema = new mongoose.Schema({
 }, {timestamps:true});
 
 export interface User{
-    id: number ;
+    id: string ;
     email: string;
     username: string;
     password: string;

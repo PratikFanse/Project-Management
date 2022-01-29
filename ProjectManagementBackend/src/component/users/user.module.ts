@@ -5,8 +5,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserScema } from './models/user.model';
 import { UserController } from './user.controller';
 import { AuthModule } from 'src/auth/auth.module';
-import { OTPService } from 'src/auth/otp/otp.service';
-import { OtpModule } from 'src/auth/otp/otp.module';
 
 @Global()
 @Module({
