@@ -9,7 +9,39 @@
 .addTask button{
     top:-56px
 }
-.todoDetails{
+.taskCategory, .userCategory{
     margin: auto;
     text-align: center;
+    background: #dcdcdc94;
+    border-radius: 12px 12px 0 0;
+}
+.taskList{
+    /* height: 250px !important; */
+    height: 460px !important;
+    overflow: overlay !important;
+}
+.activeTaskList{
+    background: white;
+    border-radius: 12px 12px 0 0;
+}
+.taskCategory div{
+    cursor: pointer;
+}
+.todo{
+    background-color: gainsboro;
+}
+.pending{
+    background-color: rgb(255 38 0 / 25%) !important;
+}
+.inprogress{
+    background-color: rgba(0, 119, 255, 0.25) !important;    
+}
+.taskState, .userRole{
+    flex: unset !important;
+    text-align: right;
+    margin-left: 10px !important;
+}
+.itemButton{
+    padding-right: 20px !important;
+    margin-right: 20px !important;
 }

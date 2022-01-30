@@ -1,0 +1,23 @@
+#userFilter fieldset{
+    border: none !important;
+}
+.userCategory{
+    text-align: left !important;
+    /* border-bottom: solid 1px black; */
+}
+.selectFilter{
+    color:#1976d2!important; 
+    font-weight:600!important; 
+    text-align: center!important;
+    font-size: 18px !important;
+}
+.userRole fieldset,.userRole .MuiSelect-select{
+    border: unset;
+    border-radius: 25px !important;
+}
+.userRole .MuiSelect-select{
+    text-transform: uppercase;
+    font-size: 13.5px !important;
+    background-color: rgba(0, 0, 0, 0.08);
+    padding: 1px 32px 0 13px;
+}

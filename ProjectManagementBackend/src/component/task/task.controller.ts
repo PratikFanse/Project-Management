@@ -13,7 +13,10 @@ export class TaskController {
     async addNewTask(@Body() newTask:Task, @Req() req){
        return this.taskService.createNewTask(newTask, req.headers.authorization)
     }
-
+    @Post('updateTask')
+    async updateTask(@Body() task:Task, @Req() req){
+       return this.taskService.updateTask(task, req.headers.authorization)
+    }
     @Get('getAllTask')
     getAllTask(@Req() req){
         return this.taskService.getAllTask(req.headers.authorization)

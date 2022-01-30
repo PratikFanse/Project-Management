@@ -60,6 +60,8 @@ export default function Signup(props){
                     setConfPass(ev.target.value)
                 }
                 break;
+            default:
+                break;
         }
         setValidation({...validations})
     }
@@ -108,7 +110,7 @@ export default function Signup(props){
                                 variant="standard"
                                 helperText={helperText.username}
                                 error={validation.isAttempted && !validation.isUserName}
-                                onChange={validateCred} />
+                                onChange={validateCred} required/>
                         </Grid>
                         <Grid item xs={6}>
                             <LocalizationProvider dateAdapter={DateAdapter}>
@@ -121,7 +123,7 @@ export default function Signup(props){
                                     onChange={ (value)=>{setDob(value)}}
                                     renderInput={(params) => 
                                         <TextField size="small" variant="standard" {...params}/>} 
-                                    />
+                                        required/>
                             </LocalizationProvider>
                         </Grid>
                         </Grid>
@@ -134,7 +136,7 @@ export default function Signup(props){
                                 variant="standard"
                                 helperText= {helperText.email}
                                 error={validation.isAttempted && (!validation.isEmail || validation.isEmailExist)}
-                                onChange={validateCred} />
+                                onChange={validateCred} required/>
                         </div>
                         <FormControl sx={{mx:1,mb:1.5, minWidth: 360}} variant='standard'>
                             <InputLabel htmlFor='password' 
@@ -158,7 +160,7 @@ export default function Signup(props){
                                     </InputAdornment>
                                   }
                                 onChange={validateCred} 
-                                />
+                                required/>
                                 <FormHelperText 
                                 error= {validation.isAttempted && !validation.isStrongPassword}>{helperText.password}</FormHelperText>
                         </FormControl>
@@ -173,7 +175,7 @@ export default function Signup(props){
                                 helperText={validation.isAttempted && !validation.isConfirmPassMatch? helperText.confPass:""}
                                 error= { validation.isAttempted && !validation.isConfirmPassMatch }
                                 onChange={validateCred} 
-                                />
+                                required/>
                         </div>
                     </CardContent>
                     <CardActions sx={{mx:2, mb:2 }}>

@@ -1,11 +1,10 @@
-import { Body, Controller, forwardRef, Get, Inject, Param, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req, Res, UnauthorizedException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { Role } from 'src/auth/role/role.enum';
 import { Roles } from 'src/auth/role/roles.decorator';
 import { Public } from 'src/auth/role/roles.guard';
 import { UserService } from './user.service';
-import { ExtractJwt, Strategy } from 'passport-jwt';
 import { OTPService } from 'src/auth/otp/otp.service';
 import { ResetPassword } from './models/resetPassword.model';
 import { NewUser } from './models/newUser.model';
@@ -50,12 +49,10 @@ export class UserController {
       return req.user;
     }
 
-    @Public()
-    @Get('accountRequest')
-    // @Roles(Role.Admin)
-    getAccountRequest(@Req() req){
-      console.log(req.query)
-      return this.userService.findAllRequest()
+    @Roles(Role.Admin)
+    @Get('getUsersList/:usersFilter')
+    getUsersList( @Param('usersFilter') usersFilter:string){
+      return this.userService.getUsersList(usersFilter)
     }
 
     @Public()
@@ -74,5 +71,11 @@ export class UserController {
     @Post('signUp')
     signUp(@Body() newUser: NewUser){
       return this.userService.createNewUser(newUser);
+    }
+    
+    @Roles(Role.Admin)
+    @Put('updateUserRole')
+    updateUserRole(@Body() newRole){
+      return this.userService.updateUserRole(newRole)
     }
 }

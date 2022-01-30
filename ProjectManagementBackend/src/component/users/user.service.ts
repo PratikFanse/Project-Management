@@ -27,8 +27,13 @@ export class UserService {
     // this.creatUser()
   }
 
-  async findAllRequest() {
-    return await this.User.find().exec();
+  async getUsersList(usersFilter) {
+    const query ={}
+    console.log(usersFilter)
+    if(usersFilter!=='allUser'){
+      query['role']=usersFilter
+    }
+    return await this.User.find(query).select({email:1,username:1,birthDate:1,role:1,isActive:1}).exec();
   }
 
   async createNewUser(user: NewUser) {
@@ -90,6 +95,10 @@ export class UserService {
     } catch(e){
       throw new NotFoundException();
     }
+  }
+
+  async updateUserRole(newRole: any) {
+    this.User.updateOne({_id:newRole.userId},{$set:{role:newRole.role}}).exec()
   }
 
   async encrypt(text){

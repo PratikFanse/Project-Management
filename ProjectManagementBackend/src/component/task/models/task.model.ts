@@ -17,6 +17,7 @@ export const TaskScema = new mongoose.Schema({
 }, {timestamps:true});
 
 export interface Task{
+    id:string;
     title: string;
     startDate: Date;
     endDate: Date;

@@ -33,7 +33,7 @@ export class TaskService {
 
     async updateTask(task, userToken){
         const user = await this.usersService.getUserFormToken(userToken)
-        await this.Task.updateOne({_id:task.id, $or:[{createdBy: user},{owner:user}]},{$set:{...task}}).exec() 
+        await this.Task.updateOne({_id:task._id, $or:[{createdBy: user},{owner:user}]},{$set:{...task}}).exec() 
     }
 
 
