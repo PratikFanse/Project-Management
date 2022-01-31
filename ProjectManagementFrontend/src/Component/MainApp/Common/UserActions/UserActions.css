@@ -1,0 +1,9 @@
+.UserAvatar:first-letter {
+    text-transform: capitalize;
+}
+.UserActions{
+    position: absolute;
+    top: 20px;
+    right: 15px;
+    z-index: 99999;
+}

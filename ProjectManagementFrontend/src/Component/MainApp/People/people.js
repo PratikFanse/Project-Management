@@ -48,6 +48,7 @@ export default function People(props){
                             label="User filter"
                           >
                             <MenuItem value='allUser'>All user</MenuItem>
+                            <MenuItem value='admin'>Admin</MenuItem>
                             <MenuItem value='manager'>Manager</MenuItem>
                             <MenuItem value='QA'>QA</MenuItem>
                             <MenuItem value='employee'>Employee</MenuItem>
@@ -58,13 +59,15 @@ export default function People(props){
                         {
                           userList.map((user)=>(
                             <ListItem key={user._id}>
-                                <ListItemButton className="itemButton" sx={{pl:1,mr:"0"}}>
+                                <ListItemButton disabled={user.email===props.userInfo.sub} className="itemButton" sx={{pl:1,mr:"0"}}>
                                   <ListItemText primary={user.username}/>
+                                  <ListItemText > <b>Email:</b> {user.email} </ListItemText>
                                   <ListItemText className="userRole">
                                     <Select
                                       id="demo-controlled-open-select"
                                       value={user.role}
                                       onChange={(event)=> changeRole(user._id,event)}
+                                      disabled={user.email===props.userInfo.sub}
                                     >
                                       <MenuItem value='employee'>Employee</MenuItem>
                                       <MenuItem value='QA'>QA</MenuItem>
