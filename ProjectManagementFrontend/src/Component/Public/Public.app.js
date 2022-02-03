@@ -1,9 +1,9 @@
-import React from "react"
+import React, { lazy, Suspense } from "react"
 import { Alert, Grid, Slide, Snackbar, Typography } from "@mui/material"
 import { useLocation } from "react-router"
-import Login from "./Authentication/Login/Login"
-import PublicRoutes from "./Public.routes"
 import './Public.App.css'
+import Loader from "../Common/loader"
+const PublicRoutes = lazy(() => import("./Public.routes"))
 
 export default function PublicApp(props){
     const currentRoute = useLocation().pathname
@@ -11,12 +11,7 @@ export default function PublicApp(props){
     const [open, setOpen] = React.useState(false);
     const [transition, setTransition] = React.useState(undefined);
     const [notifyText, setNotifyText] = React.useState('')
-    const defaultComponent = () =>{
-        if(!publicRoutes.includes(currentRoute)){
-            window.history.pushState({},'','/login')
-            return<Login/>
-        }
-    }
+ 
     const otpSent = () => {
         setNotifyText('OTP sent successfully!')
         setTransition(() => TransitionUp);
@@ -29,30 +24,31 @@ export default function PublicApp(props){
         setOpen(true);
     };
     return(
-        <header className="PublicAppHeader">
-            <Grid className='publicScreen' container spacing={2}>
-                <Grid item xs={1}></Grid>
-                <Grid item xs={5}>
-                    <Typography sx={{mx:1, mt:1, mb:0}} gutterBottom variant='h5' component="div">Welcome to</Typography>
-                    <Typography sx={{mx:1, mt:1, mb:0}} gutterBottom variant='h4' component="div">Project Management System</Typography>
+        <Suspense fallback={<Loader/>}>
+            <header className="PublicAppHeader">
+                <Grid className='publicScreen' container spacing={2}>
+                    <Grid item xs={1}></Grid>
+                    <Grid item xs={5}>
+                        <Typography sx={{mx:1, mt:1, mb:0}} gutterBottom variant='h5' component="div">Welcome to</Typography>
+                        <Typography sx={{mx:1, mt:1, mb:0}} gutterBottom variant='h4' component="div">Project Management System</Typography>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <PublicRoutes notifyOTP={otpSent} passChanged={passwordChanged}/>
+                    </Grid>
+                    <Grid item xs={2}></Grid>
+                    <Snackbar
+                      open={open}
+                      TransitionComponent={transition}
+                      autoHideDuration={6000}
+                      onClose={()=>setOpen(false)}
+                      key={transition ? transition.name : ''}>
+                        <Alert  onClose={()=>setOpen(false)} severity="success" sx={{ width: '100%' }}>
+                            {notifyText}
+                        </Alert>
+                    </Snackbar>
                 </Grid>
-                <Grid item xs={4}>
-                    {defaultComponent()}
-                    <PublicRoutes notifyOTP={otpSent} passChanged={passwordChanged}/>
-                </Grid>
-                <Grid item xs={2}></Grid>
-                <Snackbar
-                  open={open}
-                  TransitionComponent={transition}
-                  autoHideDuration={6000}
-                  onClose={()=>setOpen(false)}
-                  key={transition ? transition.name : ''}>
-                    <Alert  onClose={()=>setOpen(false)} severity="success" sx={{ width: '100%' }}>
-                        {notifyText}
-                    </Alert>
-                </Snackbar>
-            </Grid>
-        </header>
+            </header>
+        </Suspense>
     )
 }
 function TransitionUp(props) {

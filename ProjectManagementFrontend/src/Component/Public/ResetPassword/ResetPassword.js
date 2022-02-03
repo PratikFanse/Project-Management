@@ -1,11 +1,4 @@
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import { FormControl, FormHelperText, Input, IconButton,InputAdornment, InputLabel, TextField } from '@mui/material';
-import Stack from '@mui/material/Stack';
+import {Stack, Box, Card, CardActions, CardContent, Button, Typography, FormControl, FormHelperText, Input, IconButton,InputAdornment, InputLabel, TextField } from '@mui/material';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import validator from 'validator';
 import axios from 'axios';
@@ -33,13 +26,13 @@ export default function ResetPassword(props){
         password:'',
         confirmPass:''
     });
-    const [helperText, setHelperText] = new React.useState({
+    const [helperText] = new React.useState({
         password:"Min 1 special, upper & lower case & 8 char's.",
         confPass:"Entered password do not match.",
     });
     const validateInput=(ev)=>{
         const validations = {...validation}
-        if(ev.target.name!='otp')
+        if(ev.target.name!=='otp')
             setInputValues({...inputValues,[ev.target.name]: ev.target.value});
         switch (ev.target.name) {
             case 'password': {

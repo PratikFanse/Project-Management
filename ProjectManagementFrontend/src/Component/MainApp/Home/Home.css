@@ -2,6 +2,8 @@
     border-radius: 12px;
     margin: 20px !important;
     background: white;
+    padding: 0!important;
+    margin: 35px !important;
 }
 .addTask{
     float: right;

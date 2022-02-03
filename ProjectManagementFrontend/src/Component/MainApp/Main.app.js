@@ -1,17 +1,22 @@
 import Sidenav from "./Common/Sidenav/Side.nav";
-import MainRoutes from "./Main.routes";
 import { useJwt } from "react-jwt";
 import Cookies from "js-cookie";
-import UserActions from "./Common/UserActions/UserActions";
+import * as React from "react";
+import Loader from "../Common/loader";
+const MainRoutes = React.lazy(() => import("./Main.routes"));
+const UserActions = React.lazy(() => import("./Common/UserActions/UserActions"));
 
 export default function MainApp(props){
     const user = useJwt(Cookies.get('access_token')).decodedToken
     console.log(user)
     return(
-        <div className="mainApp">
-            <div className='sideNav'><Sidenav userInfo={user}/></div>
-            <MainRoutes userInfo={user}/>
-            <UserActions userInfo={user}/>
-        </div>
+
+        <React.Suspense fallback={<Loader/>}>
+            <div className="mainApp">
+                <div className='sideNav'><Sidenav userInfo={user}/></div>
+                <MainRoutes userInfo={user}/>
+                <UserActions userInfo={user}/>
+            </div>
+        </React.Suspense>
         )
 }

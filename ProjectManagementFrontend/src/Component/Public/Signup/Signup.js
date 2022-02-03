@@ -1,12 +1,5 @@
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
-import { FormControl, FormHelperText, Grid, IconButton, Input, InputAdornment, InputLabel, TextField } from '@mui/material';
-import Stack from '@mui/material/Stack';
+import {Stack, Card, CardActions, CardContent, Button, Typography, Box, FormControl, FormHelperText, Grid, IconButton, Input, InputAdornment, InputLabel, TextField } from '@mui/material';
 import './Signup.css';
 import { Link } from 'react-router-dom';
 import validator from 'validator';
@@ -14,7 +7,7 @@ import axios from 'axios';
 import LocalizationProvider from '@mui/lab/LocalizationProvider'
 import DatePicker from '@mui/lab/DatePicker';
 import DateAdapter from '@mui/lab/AdapterMoment';
-import moment from 'moment';
+import moment from 'moment/moment';
 import Visibility from '@mui/icons-material/Visibility'
 import VisibilityOff from '@mui/icons-material/VisibilityOff'
 axios.defaults.withCredentials = true

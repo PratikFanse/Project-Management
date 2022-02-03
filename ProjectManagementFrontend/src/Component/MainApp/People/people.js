@@ -3,6 +3,7 @@ import axios from 'axios';
 import * as React from 'react';
 import { useNavigate } from 'react-router';
 import './people.css'
+import '../Home/Home.css'
 
 export default function People(props){
     const navigate = useNavigate();

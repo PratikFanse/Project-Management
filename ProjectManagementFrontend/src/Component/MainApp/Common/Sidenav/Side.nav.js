@@ -31,12 +31,14 @@ export default function Sidenav(props){
                         </NavLink>
                         :''
                 }
-                <ListItem  className="sideNavItem">
-                    <ListItemIcon>
-                        <BusinessCenterOutlinedIcon/>
-                    </ListItemIcon>
-                    <ListItemText primary="Projects"/>
-                </ListItem>
+                <NavLink to='/projects'>
+                    <ListItem  className="sideNavItem">
+                        <ListItemIcon>
+                            <BusinessCenterOutlinedIcon/>
+                        </ListItemIcon>
+                        <ListItemText primary="Projects"/>
+                    </ListItem>
+                </NavLink>
             </List>
         </div> 
         )

@@ -1,5 +1,5 @@
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
-import { Box, Button, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, Stack, Step, StepButton, StepLabel, Stepper, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Chip, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, Stack, Step, StepButton, StepLabel, Stepper, Typography } from "@mui/material";
 import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import DateRangePicker from '@mui/lab/DateRangePicker';
@@ -22,7 +22,7 @@ export default function AddOrEditTask(props){
   // const [project, setProject] = React.useState('none');  
   const [projectList, setProjectList] = React.useState([]);  
   // const [owner, setOwner] = React.useState('none');  
-  const [ownerList, setOwnerList] = React.useState([]);
+  const [memebrList, setMemberList] = React.useState([]);
   const [isEditTask] = React.useState(props.isEditTask)
   const [isValidStartDate,setIsValidStartDate] = React.useState(true)
   const [task, setTask] = React.useState({
@@ -43,7 +43,10 @@ export default function AddOrEditTask(props){
   React.useEffect(()=>{
     if(isEditTask){
       axios.get('/task/getTaskById/'+props.editTaskPageInfo).then((response)=>{
-        console.log(response.data)
+        if(response.data.projectList){
+          setProjectList(response.data.projectList)
+          setMemberList(response.data.memberList)
+        }
         setTask(response.data)
         setIsValidStartDate(response.data.startDate?false:true)
         setValidations({
@@ -54,12 +57,37 @@ export default function AddOrEditTask(props){
           isAttempted:false,
         })
       })
-    }else{
-      // console.log(task)
     }
   },[isEditTask, props.editTaskPageInfo])
   React.useEffect(()=>{
-  },[])
+    if(!task.isPersonal && !task.projectList){
+      axios.get('/project/getProjectList').then((res)=>{
+        setProjectList(res.data)
+      })
+    } else {
+      if(task.projectList)
+        setTask({...task,projectList:''})
+      else{
+        setTask({...task,project:'none',owner:'none'})
+        setMemberList([])
+      }
+    }
+  },[task.isPersonal])
+  React.useEffect(()=>{
+    if(task.project && task.project!=='none' && !task.memberList){
+      axios.get('/project/getProjectMembers/'+task.project).then((res)=>{
+        setTask({...task,owner:'none'})
+        setMemberList(res.data)
+      })
+    } else {
+      if(task.memberList)
+        setTask({...task,memberList:''})
+      else{
+        setTask({...task,owner:'none'})
+        setMemberList([])
+      }
+    }
+  },[task.project])
   const updateValue = (ev) =>{
     if(ev.target.name!=='isPersonal'){
       setTask({...task, [ev.target.name]: ev.target.value})
@@ -81,9 +109,7 @@ export default function AddOrEditTask(props){
         case'title': setValidations({...validations, title:validator.isLength(ev.target.value,{min:3})})
           break;
         case 'project'||'owner': 
-            task.isPersonal?
-              setValidations({...validations, [ev.target.name]:false})
-              :setValidations(ev.target.value!=='none')
+            setValidations({...validations, [ev.target.name]: task.isPersonal && ev.target.value!=='none'})
           break;
         default:
           break;
@@ -93,7 +119,6 @@ export default function AddOrEditTask(props){
 
   const addTask=(ev)=>{
     ev.preventDefault();
-    console.log(validations)
     if(validations.title && validations.dateRange && 
       (task.isPersonal||(!task.isPersonal && task.project && task.owner))){
         axios.post('/task/addNewTask',task).then((res)=>{
@@ -107,7 +132,6 @@ export default function AddOrEditTask(props){
   }
   const updateTask=(ev)=>{
     ev.preventDefault();
-    console.log(validations)
     if(validations.title && validations.dateRange && 
       (task.isPersonal||(!task.isPersonal && task.project && task.owner))){
         axios.post('/task/updateTask',task).then((res)=>{
@@ -173,8 +197,8 @@ export default function AddOrEditTask(props){
           {
             !task.isPersonal?
             <Grid container spacing={2} sx={{ml:0}}>
-              <Grid item xs={6}>
-                <FormControl variant="standard" sx={{ minWidth: 175, mb:2 }}>
+              <Grid item xs={12}>
+                <FormControl variant="standard" sx={{ minWidth: '100%', mb:2 }}>
                   <InputLabel id="demo-simple-select-standard-label"
                   error={!validations.owner && !task.isPersonal && validations.isAttempted}>
                     Project
@@ -183,7 +207,7 @@ export default function AddOrEditTask(props){
                     labelId="demo-simple-select-standard-label"
                     name="project"
                     id="demo-simple-select-standard"
-                    value={task.project._id?task.project._id:'none'}
+                    value={task.project?task.project:'none'}
                     onChange={updateValue}
                     label="Project"
                     error={!validations.project && !task.isPersonal && validations.isAttempted}
@@ -191,14 +215,14 @@ export default function AddOrEditTask(props){
                     <MenuItem value="none">None</MenuItem>
                     { 
                       projectList.map((project)=>
-                        <MenuItem value={project._id}>{project.title}</MenuItem>  
+                        <MenuItem key={project._id} value={project._id}>{project.title}</MenuItem>  
                       )
                     }
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={6}>
-                <FormControl variant="standard" sx={{ minWidth: 175, ml:2, mb:2 }}>
+              <Grid item xs={12}>
+                <FormControl variant="standard" sx={{ minWidth: '100%', mb:2 }}>
                   <InputLabel id="demo-simple-select-standard-label" 
                   error={!validations.owner && !task.isPersonal && validations.isAttempted}>
                     Owner
@@ -206,16 +230,26 @@ export default function AddOrEditTask(props){
                   <Select
                     labelId="demo-simple-select-standard-label"
                     name="owner"
-                    id="demo-simple-select-standard"
-                    value={task.owner._id?task.owner._id:'none'}
+                    id="memberList"
+                    value={task.owner?task.owner:'none'}
                     onChange={updateValue}
                     label="Owner"
                     error={!validations.owner && !task.isPersonal && validations.isAttempted}
                   >
                     <MenuItem value="none">None</MenuItem>
                     {
-                      ownerList.map((owner)=>
-                        <MenuItem value={owner._id}>{owner.name}</MenuItem>  
+                      memebrList.map((member)=>
+                        <MenuItem className="member-li" key={member._id} value={member._id}>
+                          <Grid container spacing={2}>
+                            <Grid item xs={6}>{member.username}</Grid>
+                            <Grid item sx={{textAlign:'right'}} xs={6}>
+                              <Chip
+                                  sx={{textTransform: "uppercase"}}
+                                  label={member.role}
+                                  size="small"/>
+                            </Grid>
+                          </Grid>
+                          </MenuItem>  
                       )
                     }
                   </Select>
@@ -240,25 +274,25 @@ export default function AddOrEditTask(props){
           {
             isEditTask
               ?<Box sx={{ width: '100%', my: 4 }}>
-                <Stepper activeStep={steps.indexOf(task.transission)} nonLinear alternativeLabel>
-                    <Step key='TODO'>
+                <Stepper nonLinear activeStep={steps.indexOf(task.transission)} alternativeLabel>
+                    <Step key='TODO' active={steps.indexOf(task.transission)===0} error={null} completed={null}>
                       <StepButton color="inherit">
                         <StepLabel className={steps.indexOf(task.transission)===0?'activeStep':''} StepIconComponent={AssignmentIcon}>TODO</StepLabel>
                       </StepButton>
                     </Step>
-                    <Step key='INPROGRESS'>
+                    <Step key='INPROGRESS' active={steps.indexOf(task.transission)===1} error={null}  completed={null}>
                       <StepButton color="inherit">
                         <StepLabel className={steps.indexOf(task.transission)===1?'activeStep':''} StepIconComponent={ModelTrainingIcon}>INPROGRESS</StepLabel>
                       </StepButton>
                     </Step>
-                    <Step key='RREVIEW'>
+                    <Step key='RREVIEW' active={steps.indexOf(task.transission)===2} error={null} completed={null}>
                       <StepButton color="inherit">
                         <StepLabel className={steps.indexOf(task.transission)===2?'activeStep':''} StepIconComponent={ManageSearchIcon}>RREVIEW</StepLabel>
                       </StepButton>
                     </Step>
-                    <Step key='COMPLETED'>
-                      <StepButton disabled='false' color="inherit">
-                        <StepLabel className={steps.indexOf(task.transission)===-3?'activeStep':''} StepIconComponent={CheckCircleOutlineRoundedIcon}>COMPLETED</StepLabel>
+                    <Step key='COMPLETED' active={steps.indexOf(task.transission)===3} error={null} completed={null}>
+                      <StepButton disabled={false} color="inherit">
+                        <StepLabel className={steps.indexOf(task.transission)===3?'activeStep':''} StepIconComponent={CheckCircleOutlineRoundedIcon}>COMPLETED</StepLabel>
                       </StepButton>
                     </Step>
                 </Stepper>

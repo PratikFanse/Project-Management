@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './Component/App/App';
 import reportWebVitals from './reportWebVitals';
-import { Route, Routes, BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import axios from "axios";
 import cookie from 'js-cookie';
 

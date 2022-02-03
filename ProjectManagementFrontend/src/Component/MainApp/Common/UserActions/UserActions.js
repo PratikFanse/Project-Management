@@ -4,15 +4,16 @@ import Avatar from '@mui/material/Avatar';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
-import Divider from '@mui/material/Divider';
+// import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
+// import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
-import PersonAdd from '@mui/icons-material/PersonAdd';
-import Settings from '@mui/icons-material/Settings';
+// import PersonAdd from '@mui/icons-material/PersonAdd';
+// import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
 import './UserActions.css'
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export default function UserActions(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -24,7 +25,11 @@ export default function UserActions(props) {
     setAnchorEl(null);
   };
   const logout =()=>{
-      axios.get('/user/logout').then(()=>window.location.reload())
+      axios.get('/user/logout').then(()=>{
+        if(Cookies.get('access_token'))
+          Cookies.remove('access_token',{path:''})
+          window.location.reload()
+      })
   }
   return (
     <React.Fragment>

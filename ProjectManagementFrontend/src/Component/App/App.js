@@ -1,8 +1,9 @@
 import './App.css';
 import cookie from 'js-cookie';
-import PublicApp from '../Public/Public.app';
-import MainApp from '../MainApp/Main.app';
-import React from 'react';
+import * as React from 'react';
+import Loader from '../Common/loader';
+const PublicApp = React.lazy(() => import('../Public/Public.app'));
+const MainApp = React.lazy(() => import('../MainApp/Main.app'));
 function App() {
     const [renderApp, setRenderApp] = React.useState(null)
     React.useEffect(()=>{
@@ -14,9 +15,12 @@ function App() {
     },[])
   
   return (
+
+    <React.Suspense fallback={<Loader/>}>
     <div className="App">
       {renderApp}
     </div>
+    </React.Suspense>
   );
 }
 
