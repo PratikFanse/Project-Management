@@ -25,6 +25,8 @@ const ForkTsCheckerWebpackPlugin =
     ? require('react-dev-utils/ForkTsCheckerWarningWebpackPlugin')
     : require('react-dev-utils/ForkTsCheckerWebpackPlugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const CompressionPlugin = require("compression-webpack-plugin");
+var BrotliPlugin = require('brotli-webpack-plugin');
 
 const createEnvironmentHash = require('./webpack/persistentCache/createEnvironmentHash');
 
@@ -557,11 +559,54 @@ module.exports = function (webpackEnv) {
             },
             // ** STOP ** Are you adding a new loader?
             // Make sure to add the new loader(s) before the "file" loader.
+            {
+              loader: 'babel-loader',
+              test: /\.js$/,
+              exclude: /node_modules/,
+              options: {
+                plugins: ['lodash'],
+                presets: [['@babel/env', { 'targets': { 'node': 6 } }]]
+              }
+            },
+            {
+              test: /\.(js|jsx)$/,
+              include: [path.resolve(__dirname, 'src', 'client')],
+              use: [{
+                loader: 'babel-loader',
+                options: {
+                  plugins: [
+                    [
+                      'import',
+                      { libraryName: 'antd', style: true },
+                      'antd',
+                    ]
+                  ],
+                },
+              }],
+            },
+            {
+              'test': /\.js$/,
+              'exclude': /node_modules/,
+              use: [{
+                'loader': 'babel-loader',
+                'options': {
+                  'plugins': ['lodash'],
+                  'presets': [['@babel/env', { 'targets': { 'node': 6 } }]]
+                }
+              }]
+            },
           ],
         },
       ].filter(Boolean),
     },
     plugins: [
+      new CompressionPlugin(),
+        new BrotliPlugin({
+          asset: '[path].br[query]',
+          test: /\.(js|css|html|svg)$/,
+          threshold: 10240,
+          minRatio: 0.8
+        }),
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(
         Object.assign(

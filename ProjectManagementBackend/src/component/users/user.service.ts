@@ -62,13 +62,6 @@ export class UserService {
       throw new ForbiddenException()
     }
   }
-  // async creatUser() {
-  //   let password ='test123'
-  //   const passwordHash = await this.encrypt(password);
-  //   const newUser = new this.User({email:'pratik@yopmail.com', username:'Pratik', password:passwordHash, role:Role.Admin})
-  //   const result = await newUser.save(); 
-  // }
-  // private  users:User[] = [];
   async findOne(email: string): Promise<User | undefined> {
     try{
       let user:User = await this.User.findOne({email: email}).exec() as User;
@@ -90,11 +83,6 @@ export class UserService {
     this.User.updateOne({_id:newRole.userId},{$set:{role:newRole.role}}).exec()
   }
 
-  // async getUsersByEmailList(members: any) {
-  //   const userList:User[] = await this.User.find({email:{$in:members},isActive:true})
-  //     .select({email:1}).exec() as User[];
-  //   return userList?userList:[];
-  // }
   async getUserFormToken(jwtToken:string) {
     if(jwtToken){
       const userInfo = jwt.decode(jwtToken.replace('Bearer ',''))
