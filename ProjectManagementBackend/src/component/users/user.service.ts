@@ -11,17 +11,6 @@ import * as jwt from 'jsonwebtoken'
 import { JwtModuleOptions } from '@nestjs/jwt';
 @Injectable()
 export class UserService {
-  async getUserFormToken(jwtToken:string) {
-    if(jwtToken){
-      const userInfo = jwt.decode(jwtToken.replace('Bearer ',''))
-      const user = await this.User.findOne({email: userInfo.sub}).exec() as User
-      if(user)
-        return user.id
-      else
-        throw new NotFoundException();
-    } else 
-      throw new BadRequestException();
-  }
   constructor(@InjectModel('User') private readonly User: Model<User>, 
   @Inject(forwardRef(() => OTPService))private otpService:OTPService){
     // this.creatUser()
@@ -99,6 +88,23 @@ export class UserService {
 
   async updateUserRole(newRole: any) {
     this.User.updateOne({_id:newRole.userId},{$set:{role:newRole.role}}).exec()
+  }
+
+  // async getUsersByEmailList(members: any) {
+  //   const userList:User[] = await this.User.find({email:{$in:members},isActive:true})
+  //     .select({email:1}).exec() as User[];
+  //   return userList?userList:[];
+  // }
+  async getUserFormToken(jwtToken:string) {
+    if(jwtToken){
+      const userInfo = jwt.decode(jwtToken.replace('Bearer ',''))
+      const user = await this.User.findOne({email: userInfo.sub}).exec() as User
+      if(user)
+        return user.id
+      else
+        throw new NotFoundException();
+    } else 
+      throw new BadRequestException();
   }
 
   async encrypt(text){

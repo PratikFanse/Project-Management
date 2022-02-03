@@ -2,6 +2,7 @@ import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException 
 import { InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
 import { Model, ObjectId } from 'mongoose';
+import { ProjectService } from '../project/project.service';
 import { UserService } from '../users/user.service';
 import { Task } from './models/task.model';
 
@@ -9,7 +10,8 @@ import { Task } from './models/task.model';
 export class TaskService {
 
     constructor(@InjectModel('Task') private readonly Task: Model<Task>,
-    @Inject(forwardRef(() => UserService))private usersService: UserService ){}
+    @Inject(forwardRef(() => UserService))private usersService: UserService,
+    @Inject(forwardRef(() => ProjectService))private projectService: ProjectService ){}
 
     async createNewTask(newTask:Task, userToken) {
         const creator = await this.usersService.getUserFormToken(userToken)
@@ -38,6 +40,7 @@ export class TaskService {
 
 
     async getTaskListByCategory(userToken: any, category: String) {
+        console.log(category)
         const user = await this.usersService.getUserFormToken(userToken)
         if(category=="pending"){
             const taskList:Task[] = await this.Task.find({$or:[{createdBy: user},{owner:user}]}) as Task[]
@@ -48,6 +51,9 @@ export class TaskService {
                 }
             })
             return pendingTasks;
+        } else if(category=="isPersonal") {
+            const taskList:Task[] = await this.Task.find({isPersonal:true , createdBy: user}) as Task[]
+            return taskList ? taskList: []
         } else{
             const taskList:Task[] = await this.Task.find({transission:category ,$or:[{createdBy: user},{owner:user}]}) as Task[]
             return taskList ? taskList: []
@@ -56,7 +62,11 @@ export class TaskService {
 
     async getTaskById(userToken, taskId){
         const user = await this.usersService.getUserFormToken(userToken)
-        const taskList:Task = await this.Task.findOne({_id:taskId, $or:[{createdBy: user},{owner:user}]}) as Task
+        const taskList = JSON.parse(JSON.stringify(await this.Task.findOne({_id:taskId, $or:[{createdBy: user},{owner:user}]})));
+        if(taskList.project && taskList.project!=='none'){
+            taskList['projectList']=await this.projectService.getProjectList()
+            taskList['memberList']=await this.projectService.getProjectMembers(taskList.project)
+        }
         if(taskList) 
             return taskList 
         else 

@@ -10,12 +10,13 @@ import { ConfigModule } from '@nestjs/config';
 import { OtpModule } from 'src/auth/otp/otp.module';
 import { TaskModule } from '../task/task.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { ProjectModule } from '../project/project.module';
 @Module({
   imports: [ 
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.DATABASE_CONNECTION),
     AuthModule,
-    OtpModule,TaskModule
+    OtpModule,TaskModule,ProjectModule
    ],
   controllers: [AppController],
   providers: [
