@@ -1,4 +1,5 @@
 import * as mongoose from 'mongoose';
+import { Project } from 'src/component/project/models/project.model';
 import { User } from '../../users/models/user.model';
 
 export const TaskScema = new mongoose.Schema({
@@ -8,7 +9,7 @@ export const TaskScema = new mongoose.Schema({
     description: { type: String },
     owner:{type:Object, ref:'User'},
     isPersonal:{type:Boolean, default:true},
-    project:{type:Object},
+    project:{type:Object, ref:'Project'},
     transission:{type:String, enum:['todo','inprogress','review','completed'], default:'todo'},
     isActive: {type:Boolean, default:true},
     deletedAt:Date,
@@ -22,6 +23,7 @@ export interface Task{
     startDate: Date;
     endDate: Date;
     owner: User;
+    project: Project;
     isPersonal: boolean;
-    project:string;
+    transission:string;
 }

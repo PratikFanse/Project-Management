@@ -1,5 +1,7 @@
-import { Body, Controller, forwardRef, Get, Inject, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, forwardRef, Get, Inject, Param, Post, Put, Req } from '@nestjs/common';
 import { ObjectId } from 'mongoose';
+import { Role } from 'src/auth/role/role.enum';
+import { Roles } from 'src/auth/role/roles.decorator';
 import { Public } from 'src/auth/role/roles.guard';
 import { UserService } from '../users/user.service';
 import { Task } from './models/task.model';
@@ -30,6 +32,19 @@ export class TaskController {
     @Get('getTaskById/:id')
     getTaskById(@Req() req, @Param('id') id: string){
         return this.taskService.getTaskById(req.headers.authorization, id)
+    }
+
+    @Put('nextTransission/:taskId')
+    nextTransission(@Req() req, @Param('taskId') taskId: string){
+        console.log('nextTransission')
+        return this.taskService.nextTransission(req.headers.authorization, taskId)
+    }
+
+    @Roles(Role.QA)
+    @Put('changeTransission')
+    changeTransission(@Body() task){
+        console.log(task)
+        return this.taskService.changeTransission(task)
     }
 
 }

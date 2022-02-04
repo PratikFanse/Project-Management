@@ -19,17 +19,16 @@ const steps = [
 
 
 export default function AddOrEditTask(props){
-  // const [project, setProject] = React.useState('none');  
+  const [userInfo] = React.useState(props.userInfo);
   const [projectList, setProjectList] = React.useState([]);  
-  // const [owner, setOwner] = React.useState('none');  
   const [memebrList, setMemberList] = React.useState([]);
-  const [isEditTask] = React.useState(props.isEditTask)
+  const [isEditTask] = React.useState(props.isEditTask?true:false)
   const [isValidStartDate,setIsValidStartDate] = React.useState(true)
   const [task, setTask] = React.useState({
     title:'',
-    isPersonal:true,
-    project:'none',
-    owner:'none',
+    isPersonal:!isEditTask,
+    project:'',
+    owner:'',
     startDate:null,
     endDate:null
     });
@@ -41,7 +40,7 @@ export default function AddOrEditTask(props){
     isAttempted:false,
   });
   React.useEffect(()=>{
-    if(isEditTask){
+    if(isEditTask && props.editTaskPageInfo){
       axios.get('/task/getTaskById/'+props.editTaskPageInfo).then((response)=>{
         if(response.data.projectList){
           setProjectList(response.data.projectList)
@@ -105,14 +104,12 @@ export default function AddOrEditTask(props){
           setValidations({...validations,dateRange:false})  
         }
     } else{
-      switch(ev.target.name){
-        case'title': setValidations({...validations, title:validator.isLength(ev.target.value,{min:3})})
-          break;
-        case 'project'||'owner': 
-            setValidations({...validations, [ev.target.name]: task.isPersonal && ev.target.value!=='none'})
-          break;
-        default:
-          break;
+      console.log(ev.target.name,task.isPersonal && ev.target.value!=='none')
+      if(ev.target.name === 'title'){
+        setValidations({...validations, title:validator.isLength(ev.target.value,{min:3})})
+      } else if(ev.target.name === 'project' || ev.target.name === 'owner'){
+        setValidations({...validations, 
+          [ev.target.name]: (!task.isPersonal && ev.target.value!=='none')||task.isPersonal})
       }
     }
   }
@@ -120,8 +117,14 @@ export default function AddOrEditTask(props){
   const addTask=(ev)=>{
     ev.preventDefault();
     if(validations.title && validations.dateRange && 
-      (task.isPersonal||(!task.isPersonal && task.project && task.owner))){
-        axios.post('/task/addNewTask',task).then((res)=>{
+      (task.isPersonal||(!task.isPersonal && task.project!=='none' && task.owner!=='none'))){
+        let newTask = {...task}
+        if(newTask.project==="none"||!newTask.project){
+          delete newTask['project']
+          delete newTask['owner']
+        }
+        console.log(newTask)
+        axios.post('/task/addNewTask',newTask).then((res)=>{
           props.reRenderTask('')
           props.reRenderTask('allTask')
           props.handleClose()
@@ -132,9 +135,16 @@ export default function AddOrEditTask(props){
   }
   const updateTask=(ev)=>{
     ev.preventDefault();
+    console.log(validations)
     if(validations.title && validations.dateRange && 
-      (task.isPersonal||(!task.isPersonal && task.project && task.owner))){
-        axios.post('/task/updateTask',task).then((res)=>{
+      (task.isPersonal||(!task.isPersonal && task.project!=='none' && task.owner!=='none'))){
+        let newTask = {...task}
+        if(newTask.project==="none"||!newTask.project){
+          delete newTask['project']
+          delete newTask['owner']
+        }
+        console.log(newTask)
+        axios.post('/task/updateTask',newTask).then((res)=>{
           props.reRenderTask('')
           props.reRenderTask('allTask')
           props.handleClose()
@@ -142,6 +152,14 @@ export default function AddOrEditTask(props){
       } else {
         setValidations({...validations, isAttempted:true})
       }
+  }
+  const changeTransission=(transission)=>{
+    axios.put('/task/changeTransission',{transission:transission,taskId:task._id}).then(()=>{
+      props.reRenderTask('')
+      props.reRenderTask('allTask')
+      props.handleClose()
+      }
+    )
   }
   return(
       <Box component="form" autoComplete="off" onSubmit={isEditTask?updateTask:addTask} sx={style}>
@@ -184,31 +202,34 @@ export default function AddOrEditTask(props){
               )}
             />
           </LocalizationProvider>
-          <Grid item sx={{mb:1}} xs={12}>
-            <FormControlLabel 
-              name="isPersonal"
-              control={
-                <Checkbox checked={task.isPersonal}
-                  onClick={updateValue}
-              />} 
-              label="Is this Personal task" 
-            />
-          </Grid>
+          {
+            !isEditTask?<Grid item sx={{mb:1}} xs={12}>
+              <FormControlLabel 
+                name="isPersonal"
+                control={
+                  <Checkbox checked={task.isPersonal}
+                    onClick={updateValue}
+                />} 
+                label="Is this Personal task" 
+              />
+            </Grid>:''
+          }
           {
             !task.isPersonal?
-            <Grid container spacing={2} sx={{ml:0}}>
+            <Grid container spacing={2} sx={isEditTask?{ml:0,mt:1.5}:{ml:0}}>
               <Grid item xs={12}>
                 <FormControl variant="standard" sx={{ minWidth: '100%', mb:2 }}>
-                  <InputLabel id="demo-simple-select-standard-label"
-                  error={!validations.owner && !task.isPersonal && validations.isAttempted}>
+                  <InputLabel id="select-project-label"
+                  error={!validations.project && !task.isPersonal && validations.isAttempted}>
                     Project
                   </InputLabel>
                   <Select
-                    labelId="demo-simple-select-standard-label"
+                    labelId="select-project-label"
                     name="project"
                     id="demo-simple-select-standard"
                     value={task.project?task.project:'none'}
                     onChange={updateValue}
+                    disabled={isEditTask}
                     label="Project"
                     error={!validations.project && !task.isPersonal && validations.isAttempted}
                   >
@@ -223,12 +244,12 @@ export default function AddOrEditTask(props){
               </Grid>
               <Grid item xs={12}>
                 <FormControl variant="standard" sx={{ minWidth: '100%', mb:2 }}>
-                  <InputLabel id="demo-simple-select-standard-label" 
+                  <InputLabel id="select-owner-label" 
                   error={!validations.owner && !task.isPersonal && validations.isAttempted}>
                     Owner
                   </InputLabel>
                   <Select
-                    labelId="demo-simple-select-standard-label"
+                    labelId="select-owner-label"
                     name="owner"
                     id="memberList"
                     value={task.owner?task.owner:'none'}
@@ -267,32 +288,32 @@ export default function AddOrEditTask(props){
             placeholder="Description"
             multiline
             variant="filled"
-            rows={4}
+            rows={2}
             onChange={updateValue}
             />
           </Grid>
           {
-            isEditTask
+            isEditTask && (userInfo.role!=='employee' || (userInfo.role==='employee' && task.isPersonal))
               ?<Box sx={{ width: '100%', my: 4 }}>
-                <Stepper nonLinear activeStep={steps.indexOf(task.transission)} alternativeLabel>
-                    <Step key='TODO' active={steps.indexOf(task.transission)===0} error={null} completed={null}>
-                      <StepButton color="inherit">
-                        <StepLabel className={steps.indexOf(task.transission)===0?'activeStep':''} StepIconComponent={AssignmentIcon}>TODO</StepLabel>
+                <Stepper nonLinear activeStep={steps.indexOf(task.transission)} alternativeLabel >
+                    <Step key='TODO' active={steps.indexOf(task.transission)===0} >
+                      <StepButton color="inherit" onClick={()=>changeTransission('todo')}>
+                        <StepLabel className={steps.indexOf(task.transission)===0?'activeStep':''} StepIconComponent={()=><AssignmentIcon/>}>TODO</StepLabel>
                       </StepButton>
                     </Step>
-                    <Step key='INPROGRESS' active={steps.indexOf(task.transission)===1} error={null}  completed={null}>
-                      <StepButton color="inherit">
-                        <StepLabel className={steps.indexOf(task.transission)===1?'activeStep':''} StepIconComponent={ModelTrainingIcon}>INPROGRESS</StepLabel>
+                    <Step key='INPROGRESS' active={steps.indexOf(task.transission)===1}>
+                      <StepButton color="inherit" onClick={()=>changeTransission('inprogress')}>
+                        <StepLabel className={steps.indexOf(task.transission)===1?'activeStep':''} StepIconComponent={()=><ModelTrainingIcon/>}>INPROGRESS</StepLabel>
                       </StepButton>
                     </Step>
-                    <Step key='RREVIEW' active={steps.indexOf(task.transission)===2} error={null} completed={null}>
-                      <StepButton color="inherit">
-                        <StepLabel className={steps.indexOf(task.transission)===2?'activeStep':''} StepIconComponent={ManageSearchIcon}>RREVIEW</StepLabel>
+                    <Step key='RREVIEW' active={steps.indexOf(task.transission)===2}>
+                      <StepButton color="inherit" onClick={()=>changeTransission('review')}>
+                        <StepLabel className={steps.indexOf(task.transission)===2?'activeStep':''} StepIconComponent={()=><ManageSearchIcon/>}>REVIEW</StepLabel>
                       </StepButton>
                     </Step>
-                    <Step key='COMPLETED' active={steps.indexOf(task.transission)===3} error={null} completed={null}>
-                      <StepButton disabled={false} color="inherit">
-                        <StepLabel className={steps.indexOf(task.transission)===3?'activeStep':''} StepIconComponent={CheckCircleOutlineRoundedIcon}>COMPLETED</StepLabel>
+                    <Step key='COMPLETED' active={steps.indexOf(task.transission)===3}>
+                      <StepButton disabled={false} color="inherit" onClick={()=>changeTransission('completed')}>
+                        <StepLabel className={steps.indexOf(task.transission)===3?'activeStep':''} StepIconComponent={()=><CheckCircleOutlineRoundedIcon/>}>COMPLETED</StepLabel>
                       </StepButton>
                     </Step>
                 </Stepper>
