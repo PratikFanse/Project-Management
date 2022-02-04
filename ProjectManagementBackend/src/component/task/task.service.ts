@@ -5,6 +5,8 @@ import { Model, ObjectId } from 'mongoose';
 import { ProjectService } from '../project/project.service';
 import { UserService } from '../users/user.service';
 import { Task } from './models/task.model';
+import * as jwt from 'jsonwebtoken';
+import { Role } from 'src/auth/role/role.enum';
 
 @Injectable()
 export class TaskService {
@@ -29,26 +31,61 @@ export class TaskService {
 
     async getAllTask(userToken){
         const user = await this.usersService.getUserFormToken(userToken)
-        const taskList:Task[] = await this.Task.find({$or:[{createdBy: user},{owner:user}]}).populate('project', 'title', 'Project').sort({endDate: 1}).exec() as Task[]
+        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
+        let query={};
+        if(userInfo.role==Role.Admin){
+            query={$or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
+        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
+            const projects =await this.projectService.userProjects(user)
+            query={$or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
+        } else {
+            query= {$or:[{createdBy: user},{owner:user}]}
+        }
+        const taskList:Task[] = await this.Task.find(query).populate('project', 'title', 'Project').sort({endDate: 1}).exec() as Task[]
         return taskList ? taskList: []
     }
 
     async updateTask(task, userToken){
         const user = await this.usersService.getUserFormToken(userToken)
-        await this.Task.updateOne({_id:task._id, $or:[{createdBy: user},{owner:user}]},{$set:{...task}}).exec() 
+        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
+        let query={};
+        if(userInfo.role==Role.Admin){
+            query={id:task._id, $or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
+        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
+            const projects =await this.projectService.userProjects(user)
+            query={id:task._id, $or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
+        } else {
+            query= {id:task._id, $or:[{createdBy: user},{owner:user}]}
+        }
+        await this.Task.updateOne(query,{$set:{...task}}).exec() 
     }
 
 
     async getTaskListByCategory(userToken: any, category: String) {
         console.log(category)
         const user = await this.usersService.getUserFormToken(userToken)
+        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
         let query ={}
         if(category=="pending"){
-            query= {$or:[{createdBy: user},{owner:user}]};
+            if(userInfo.role==Role.Admin){
+                query={$or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
+            } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
+                const projects =await this.projectService.userProjects(user)
+                query={$or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
+            } else {
+                query= {$or:[{createdBy: user},{owner:user}]}
+            }
         } else if(category=="isPersonal") {
             query= {isPersonal:true , createdBy: user};
         } else{
-            query = {transission:category ,$or:[{createdBy: user},{owner:user}]}
+            if(userInfo.role==Role.Admin){
+                query={transission:category ,$or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
+            } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
+                const projects =await this.projectService.userProjects(user)
+                query={transission:category , $or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
+            } else {
+                query= {transission:category ,$or:[{createdBy: user},{owner:user}]}
+            }
         }
         const taskList:Task[] = await this.Task.find(query).populate('project', 'title', 'Project').sort({endDate: 1}).exec() as Task[]
         if(category=="pending"){
@@ -65,10 +102,20 @@ export class TaskService {
 
     async getTaskById(userToken, taskId){
         const user = await this.usersService.getUserFormToken(userToken)
+        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
+        let query ={}
+        if(userInfo.role==Role.Admin){
+            query={_id:taskId, $or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
+        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
+            const projects =await this.projectService.userProjects(user)
+            query={_id:taskId, $or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
+        } else {
+            query= {_id:taskId, $or:[{createdBy: user},{owner:user}]}
+        }
         const task = 
             JSON.parse(
                 JSON.stringify(
-                    await this.Task.findOne({_id:taskId, $or:[{createdBy: user},{owner:user}]})
+                    await this.Task.findOne(query).exec()
                 )
             );
         if(task.project && task.project!=='none'){
@@ -84,7 +131,17 @@ export class TaskService {
     async nextTransission(userToken: any, taskId: string) {
         const transission = ['todo','inprogress','review','completed'];
         const user = await this.usersService.getUserFormToken(userToken)
-        const task = await this.Task.findOne({_id:taskId, $or:[{createdBy: user},{owner:user}]});
+        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
+        let query ={}
+        if(userInfo.role==Role.Admin){
+            query={_id:taskId, $or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
+        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
+            const projects =await this.projectService.userProjects(user)
+            query={_id:taskId, $or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
+        } else {
+            query= {_id:taskId, $or:[{createdBy: user},{owner:user}]}
+        }
+        const task = await this.Task.findOne(query).exec();
         if(task.transission!=='completed'){
             task.transission = transission[transission.indexOf(task.transission)+1];
             task.save();

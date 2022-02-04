@@ -41,4 +41,9 @@ export class ProjectService {
     async updateProject(project){
         await this.Project.updateOne({_id:project._id},{$set:project}).exec()
     }
+    
+    async userProjects(user){
+        const projects = await this.Project.find({ members: user }).select({title:1}).exec() as Project[]
+        return projects.map((project)=>project.id)
+    }
 }
