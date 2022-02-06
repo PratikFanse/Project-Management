@@ -25,4 +25,10 @@ export class ProjectController {
     getProjectMembers(@Param('projectId') projectId:string){
         return this.projectService.getProjectMembers(projectId)
     }
+
+    @Get('getProject/:projectId')
+    getProject(@Param('projectId') projectId:string, @Req() req){
+        console.log('getProject')
+        return this.projectService.getProject(projectId, req.headers.authorization)
+    }
 }

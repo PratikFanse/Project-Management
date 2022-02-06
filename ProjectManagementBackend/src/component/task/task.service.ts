@@ -29,21 +29,30 @@ export class TaskService {
             throw new BadRequestException();
     }
 
-    async getAllTask(userToken){
-        const user = await this.usersService.getUserFormToken(userToken)
-        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
-        let query={};
-        if(userInfo.role==Role.Admin){
-            query={$or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
-        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
-            const projects =await this.projectService.userProjects(user)
-            query={$or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
-        } else {
-            query= {$or:[{createdBy: user},{owner:user}]}
-        }
-        const taskList:Task[] = await this.Task.find(query).populate('project', 'title', 'Project').sort({endDate: 1}).exec() as Task[]
-        return taskList ? taskList: []
-    }
+    // async getAllTask(userToken, projectId){
+    //     const user = await this.usersService.getUserFormToken(userToken)
+    //     const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
+    //     let query={};
+    //     if(userInfo.role==Role.Admin){
+    //         if(projectId && projectId!=='null')
+    //             query={project:projectId, $or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
+    //         else    
+    //             query={$or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
+    //     } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
+    //         const projects =await this.projectService.userProjects(user)
+    //         if(projectId && projectId!=='null')
+    //             query={project:projectId, $or:[{createdBy: user},{owner:user}]}
+    //         else
+    //             query={$or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
+    //     } else {
+    //         if(projectId && projectId!=='null')
+    //             query= {project:projectId, $or:[{createdBy: user},{owner:user}]}
+    //         else
+    //             query= {$or:[{createdBy: user},{owner:user}]}
+    //     }
+    //     const taskList:Task[] = await this.Task.find(query).populate('project', 'title', 'Project').sort({endDate: 1}).exec() as Task[]
+    //     return taskList ? taskList: []
+    // }
 
     async updateTask(task, userToken){
         const user = await this.usersService.getUserFormToken(userToken)
@@ -60,32 +69,17 @@ export class TaskService {
         await this.Task.updateOne(query,{$set:{...task}}).exec() 
     }
 
-
-    async getTaskListByCategory(userToken: any, category: String) {
+    async getTaskListByCategory(userToken: any, category: String, projectId) {
         console.log(category)
         const user = await this.usersService.getUserFormToken(userToken)
         const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
         let query ={}
-        if(category=="pending"){
-            if(userInfo.role==Role.Admin){
-                query={$or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
-            } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
-                const projects =await this.projectService.userProjects(user)
-                query={$or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
-            } else {
-                query= {$or:[{createdBy: user},{owner:user}]}
-            }
+        if(category=="pending" || category==="allTask"){
+            query = await this.pendingOrAllTask(userInfo, user, projectId)
         } else if(category=="isPersonal") {
             query= {isPersonal:true , createdBy: user};
         } else{
-            if(userInfo.role==Role.Admin){
-                query={transission:category ,$or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
-            } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
-                const projects =await this.projectService.userProjects(user)
-                query={transission:category , $or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
-            } else {
-                query= {transission:category ,$or:[{createdBy: user},{owner:user}]}
-            }
+            query= await this.otherCategory(category, userInfo, user, projectId)
         }
         const taskList:Task[] = await this.Task.find(query).populate('project', 'title', 'Project').sort({endDate: 1}).exec() as Task[]
         if(category=="pending"){
@@ -98,6 +92,48 @@ export class TaskService {
             return pendingTasks;
         } else
             return taskList ? taskList: []
+    }
+
+    async pendingOrAllTask(userInfo,userId,projectId){
+        if(userInfo.role==Role.Admin){
+            if(projectId && projectId!=='null')
+                return {project:projectId, $or:[{createdBy: userId, isPersonal:true},{owner:userId},{isPersonal:false}]}
+            else    
+                return {$or:[{createdBy: userId, isPersonal:true},{owner:userId},{isPersonal:false}]}
+        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
+            if(projectId && projectId!=='null')
+                return {project:projectId, $or:[{createdBy: userId},{owner:userId}]}
+            else{
+                const projects =await this.projectService.userProjects(userId)
+                return {$or:[{createdBy: userId},{owner:userId},{project:{$in:projects}}]}
+            }
+        } else {
+            if(projectId && projectId!=='null')
+                return {project:projectId, $or:[{createdBy: userId},{owner:userId}]}
+            else
+                return {$or:[{createdBy: userId},{owner:userId}]}
+        }
+    }
+
+    async otherCategory(category, userInfo, userId, projectId){
+        if(userInfo.role==Role.Admin){
+            if(projectId && projectId!=='null')
+                return {project:projectId, transission:category ,$or:[{createdBy: userId, isPersonal:true},{owner:userId},{isPersonal:false}]}
+            else
+                return {transission:category ,$or:[{createdBy: userId, isPersonal:true},{owner:userId},{isPersonal:false}]}
+        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
+            if(projectId && projectId!=='null')
+                return {project:projectId, transission:category , $or:[{createdBy: userId},{owner:userId}]}
+            else{
+                const projects =await this.projectService.userProjects(userId)
+                return {transission:category , $or:[{createdBy: userId},{owner:userId},{project:{$in:projects}}]}
+            }
+        } else {
+            if(projectId && projectId!=='null')
+                return {project:projectId, transission:category ,$or:[{createdBy: userId},{owner:userId}]}
+            else
+                return {transission:category ,$or:[{createdBy: userId},{owner:userId}]}
+        }
     }
 
     async getTaskById(userToken, taskId){

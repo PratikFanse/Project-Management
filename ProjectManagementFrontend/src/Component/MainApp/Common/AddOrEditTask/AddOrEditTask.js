@@ -24,10 +24,11 @@ export default function AddOrEditTask(props){
   const [memebrList, setMemberList] = React.useState([]);
   const [isEditTask] = React.useState(props.isEditTask?true:false)
   const [isValidStartDate,setIsValidStartDate] = React.useState(true)
+  const [project] = React.useState(props.project?props.project:null)
   const [task, setTask] = React.useState({
     title:'',
-    isPersonal:!isEditTask,
-    project:'',
+    isPersonal:project?false:!isEditTask,
+    project:project?project.id:'',
     owner:'',
     startDate:null,
     endDate:null
@@ -35,7 +36,7 @@ export default function AddOrEditTask(props){
   const [validations,setValidations] = React.useState({
     title:false,
     dateRange:false,
-    project:false,
+    project:project?true:false,
     owner:false,
     isAttempted:false,
   });
@@ -203,7 +204,8 @@ export default function AddOrEditTask(props){
             />
           </LocalizationProvider>
           {
-            !isEditTask?<Grid item sx={{mb:1}} xs={12}>
+            isEditTask || project?''
+            :<Grid item sx={{mb:1}} xs={12}>
               <FormControlLabel 
                 name="isPersonal"
                 control={
@@ -212,11 +214,11 @@ export default function AddOrEditTask(props){
                 />} 
                 label="Is this Personal task" 
               />
-            </Grid>:''
+            </Grid>
           }
           {
             !task.isPersonal?
-            <Grid container spacing={2} sx={isEditTask?{ml:0,mt:1.5}:{ml:0}}>
+            <Grid container spacing={2} sx={isEditTask||project?{ml:0,mt:1.5}:{ml:0}}>
               <Grid item xs={12}>
                 <FormControl variant="standard" sx={{ minWidth: '100%', mb:2 }}>
                   <InputLabel id="select-project-label"
@@ -229,12 +231,13 @@ export default function AddOrEditTask(props){
                     id="demo-simple-select-standard"
                     value={task.project?task.project:'none'}
                     onChange={updateValue}
-                    disabled={isEditTask}
+                    disabled={isEditTask || project?true:false}
                     label="Project"
                     error={!validations.project && !task.isPersonal && validations.isAttempted}
                   >
                     <MenuItem value="none">None</MenuItem>
-                    { 
+                    { project?
+                      <MenuItem key={project.id} value={project.id}>{project.title}</MenuItem>:  
                       projectList.map((project)=>
                         <MenuItem key={project._id} value={project._id}>{project.title}</MenuItem>  
                       )

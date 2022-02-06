@@ -11,47 +11,37 @@ import Paper from '@mui/material/Paper';
 import moment from 'moment';
 import './Projects.css'
 import Loader from '../../Common/loader';
+import { Link } from 'react-router-dom';
 const AddOrEditProject = React.lazy(() => import('./Project/AddOrEditProject'));
 
 export default function Projects(props){
-    const navigate = useNavigate();
-    const [userList, setUserList] = React.useState([]);
-    const [userInfo] = React.useState(props.userInfo);
     const [userFilter, setUserFilter] = React.useState('allUser');
-    const [toggle, setToggle] = React.useState(false);
     const [open, setOpen] = React.useState(false);
-    const [isEditTaskPage,setIsEditTaskPage] = React.useState(false)
-    const [editTaskPageInfo,setEditTaskPageInfo] = React.useState('')
+    const [isEditProjectPage,setIsEditProjectPage] = React.useState(false)
+    const [editProjectPageInfo,setEditProjectPageInfo] = React.useState('')
+    const [projectRoute, setProjectRoute] = React.useState();
+    const [projectId, setProjectId] = React.useState(null);
     const handleOpen = (isEdit,editTaskId) => {
-      setEditTaskPageInfo(editTaskId?editTaskId:'');
-      setIsEditTaskPage(isEdit)
+      setEditProjectPageInfo(editTaskId?editTaskId:'');
+      setIsEditProjectPage(isEdit)
       setOpen(true);
     }
     const handleClose = () => setOpen(false); 
     const [projectList, setProjectList] = React.useState([]);
-    const [taskCategory, setTaskCategory] = React.useState('allTask')
-    const fetchTaskList =(taskListType)=>{
-      setTaskCategory(taskListType)
-    }
     React.useEffect(() =>{
         axios.get('/project/getProjectList').then((res)=>{
           console.log(res.data)
             setProjectList(res.data)
         })
-    },[toggle])
-    const selectFilter = (event) => {
-        setUserFilter(event.target.value);
-    };
-    const changeRole =(userId,ev)=>{
-        console.log(ev.target.value, userId)
-        const newRole = {userId: userId, role:ev.target.value}
-        axios.put('/user/updateUserRole/',newRole).then((res)=>{
-            setToggle(!toggle)
-            setUserFilter(userFilter)
-        })
+    },[])
+    const openProject =(id)=>{
+      setProjectId({id})
     }
+    React.useEffect(()=>{
+      if(projectId)
+        projectRoute.click()
+    },[projectId])
     return(
-
       <React.Suspense fallback={<Loader/>}>
         <Grid className='projectsPage' container spacing={2}>
             <Grid className="mainAppHeader" item container xs={12}>
@@ -77,15 +67,15 @@ export default function Projects(props){
                   </TableHead>
                   <TableBody>
                     {projectList.map((project) => (
-                      <StyledTableRow hover className='projectRow' key={project._id}>
-                        <StyledTableCell component="th" scope="row">
-                          {project.title}
-                        </StyledTableCell>
-                        <StyledTableCell align="right">{project.status}</StyledTableCell>
-                        <StyledTableCell align="right">{project.owner.username}</StyledTableCell>
-                        <StyledTableCell align="right">{moment(project.startDate).format('MMM-DD-YYYY')}</StyledTableCell>
-                        <StyledTableCell align="right">{moment(project.endDate).format('MMM-DD-YYYY')}</StyledTableCell>
-                      </StyledTableRow>
+                        <StyledTableRow onClick={()=>openProject(project._id)} hover className='projectRow' key={project._id}>
+                          <StyledTableCell component="th" scope="row">
+                              {project.title}
+                            </StyledTableCell>
+                            <StyledTableCell align="right">{project.status}</StyledTableCell>
+                            <StyledTableCell align="right">{project.owner.username}</StyledTableCell>
+                            <StyledTableCell align="right">{moment(project.startDate).format('MMM-DD-YYYY')}</StyledTableCell>
+                            <StyledTableCell align="right">{moment(project.endDate).format('MMM-DD-YYYY')}</StyledTableCell>
+                        </StyledTableRow>
                     ))}
                   </TableBody>
                 </Table>
@@ -97,11 +87,12 @@ export default function Projects(props){
                 // aria-describedby="modal-modal-description"
                 >
                   <Box>
-                    <AddOrEditProject isEditTask={isEditTaskPage} editTaskPageInfo={editTaskPageInfo} reRenderTask={setTaskCategory} handleClose={handleClose}/>
+                    <AddOrEditProject isEditTask={isEditProjectPage} editProjectPageInfo={editProjectPageInfo} handleClose={handleClose}/>
                   </Box>
               </Modal>
             </Grid>
         </Grid>
+        <Link to="/project" state={projectId} ref={input => setProjectRoute(input)}></Link>
         </React.Suspense>
     )
 }

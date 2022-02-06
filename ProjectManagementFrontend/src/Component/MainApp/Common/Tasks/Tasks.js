@@ -11,6 +11,7 @@ import { Box, Grid, Modal, Switch, Typography } from "@mui/material";
 import moment from "moment";
 import * as React from "react";
 import axios from "axios";
+import './Tasks.css'
 const AddOrEditTask = React.lazy(() => import("../AddOrEditTask/AddOrEditTask"));
 
 export default function Tasks(props){
@@ -19,6 +20,7 @@ export default function Tasks(props){
   const [isPersonal, setIsPersonal] = React.useState(false);
   const [taskList, setTaskList] = React.useState([]);
   const [openTaskModal, setOpenTaskModal] = React.useState(false);
+  const [project] = React.useState(props.project?props.project:null);
     const [isEditTaskPage,setIsEditTaskPage] = React.useState(false)
     const [editTaskPageInfo,setEditTaskPageInfo] = React.useState('')
     const handleClose = () => setOpenTaskModal(false); 
@@ -41,18 +43,23 @@ export default function Tasks(props){
     }
     React.useEffect(()=>{
       props.setDataToHome(handleOpen)
-    })
+    },[])
     React.useEffect(()=>{
-      if(taskCategory==='allTask')
-        axios.get('/task/getAllTask').then((response)=>{
+      let url="";
+      if(taskCategory==='allTask'){
+        if(project) url = '/task/getAllTask/'+ project.id
+        else url = '/task/getAllTask/null';
+        axios.get(url).then((response)=>{
           console.log(response.data)
           setTaskList(response.data)
         })
-      else if(taskCategory)
-        axios.get('/task/getTaskListByCategory/'+taskCategory).then((response)=>{
-          console.log(response.data)
+      } else if(taskCategory){
+        if(project) url = '/task/getTaskListByCategory/'+taskCategory+'/'+ project.id
+        else url = '/task/getTaskListByCategory/'+taskCategory+'/null';
+        axios.get(url).then((response)=>{
           setTaskList(response.data)
         })
+      }
     },[taskCategory,dataToggler])
     const nextTransission=(taskId)=>{
       if(window.confirm('Do you realy want to change transission of this task?'))
@@ -64,7 +71,7 @@ export default function Tasks(props){
         <Grid className="todoList" item xs={12}>
             <Grid className="taskCategory" item container xs={12}>
                 <Grid className={taskCategory==="allTask" || taskCategory==="isPersonal"?"activeTaskList":""} onClick={()=>fetchTaskList(isPersonal?'isPersonal':'allTask')} item xs={2}>
-                    <h2>{isPersonal?'Personal':'All task'} <Switch checked={!isPersonal} onClick={togglePersonalTask} size="small" /></h2>
+                    { project?<h2>All task</h2>:<h2>{isPersonal?'Personal':'All task'} <Switch checked={!isPersonal} onClick={togglePersonalTask} size="small" /></h2>}
                 </Grid>
                 <Grid className={taskCategory==="todo"?"activeTaskList":""} onClick={()=>fetchTaskList('todo')} item xs={2}>
                     <h2>ToDo</h2>
@@ -159,6 +166,7 @@ export default function Tasks(props){
                     editTaskPageInfo={editTaskPageInfo} 
                     reRenderTask={setTaskCategory} 
                     handleClose={handleClose}
+                    project={project}
                     {...props}/>
                 </Box>
               </Modal>

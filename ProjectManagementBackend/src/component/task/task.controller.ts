@@ -19,14 +19,14 @@ export class TaskController {
     async updateTask(@Body() task:Task, @Req() req){
        return this.taskService.updateTask(task, req.headers.authorization)
     }
-    @Get('getAllTask')
-    getAllTask(@Req() req){
-        return this.taskService.getAllTask(req.headers.authorization)
+    @Get('getAllTask/:projectId')
+    getAllTask(@Req() req, @Param('projectId') projectId: string){
+        return this.taskService.getTaskListByCategory(req.headers.authorization,'allTask', projectId)
     }
 
-    @Get('getTaskListByCategory/:category')
-    getTaskListByCategory(@Req() req, @Param('category') category: string){
-        return this.taskService.getTaskListByCategory(req.headers.authorization, category)
+    @Get('getTaskListByCategory/:category/:projectId')
+    getTaskListByCategory(@Req() req, @Param('category') category: string, @Param('projectId') projectId: string){
+        return this.taskService.getTaskListByCategory(req.headers.authorization, category, projectId)
     }
     
     @Get('getTaskById/:id')
