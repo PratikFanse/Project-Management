@@ -6,7 +6,7 @@ import DateRangePicker from '@mui/lab/DateRangePicker';
 import DateAdapter from '@mui/lab/AdapterMoment';
 import validator from "validator";
 import axios from "axios";
-import { isMoment } from "moment";
+import moment, { isMoment } from "moment";
 import { useTheme } from '@mui/material/styles';
 import './Project.css'
 const ITEM_HEIGHT = 48;
@@ -30,9 +30,11 @@ const MenuProps = {
   }
   
 export default function AddOrEditProject(props){
+  const [projectId] = React.useState(props.editProjectPageInfo);
   const [userInfo] = React.useState(props.userInfo)
   const [isEditProject] = React.useState(props.isEditProject)
   const [isValidStartDate,setIsValidStartDate] = React.useState(true)
+  const [toggler] = React.useState(props.dataToggler)
   const theme = useTheme();
   
   const [memberList,setMemberList] = React.useState([]);
@@ -61,8 +63,7 @@ export default function AddOrEditProject(props){
   });
   React.useEffect(()=>{
     if(isEditProject){
-      axios.get('/project/getTaskById/'+props.editTaskPageInfo).then((response)=>{
-        console.log(response.data)
+      axios.get('/project/getProject/'+projectId).then((response)=>{
         setProject(response.data)
         setIsValidStartDate(response.data.startDate?false:true)
         setValidations({
@@ -86,7 +87,10 @@ export default function AddOrEditProject(props){
     if(dateRange){
       if(isMoment(dateRange[0]) && isMoment(dateRange[1]) &&
         dateRange[0].isSameOrBefore(dateRange[1],'date')){
-          setValidations({...validations,dateRange:true})
+          if(isValidStartDate && dateRange[0].isSameOrAfter(new Date(),'date'))
+            setValidations({...validations,dateRange:true})
+          else
+            setValidations({...validations,dateRange:false})
         } else {
           setValidations({...validations,dateRange:false})  
         }
@@ -102,12 +106,10 @@ export default function AddOrEditProject(props){
 
   const addTask=(ev)=>{
     ev.preventDefault();
-    console.log(validations)
     if(validations.title && validations.dateRange){
         axios.post('/project/createProject',project).then((res)=>{
-        //   props.reRenderTask('')
-        // //   props.reRenderTask('allTask')
-        //   props.handleClose()
+          toggler.setDataToggler(!toggler.dataToggler)
+          props.handleClose()
         })
       } else {
         setValidations({...validations, isAttempted:true})
@@ -115,24 +117,14 @@ export default function AddOrEditProject(props){
   }
   const updateTask=(ev)=>{
     ev.preventDefault();
-    console.log(validations)
     if(validations.title && validations.dateRange){
-        axios.post('/project/updateTask',project).then((res)=>{
-          props.reRenderTask('')
-          props.reRenderTask('allTask')
+        axios.put('/project/updateProject',project).then((res)=>{
           props.handleClose()
         })
       } else {
         setValidations({...validations, isAttempted:true})
       }
   }
-  const handleClick = () => {
-    console.info('You clicked the Chip.');
-  };
-
-  const handleDelete = () => {
-    console.info('You clicked the delete icon.');
-  };
 
   const selectedMembers =(selected)=>{
     return (
@@ -170,6 +162,8 @@ export default function AddOrEditProject(props){
                 value={[project.startDate,project.endDate]}
                 // minDate={new Date()}
                 onChange={(newValue) => {
+                  if(!moment(newValue[0]).isSame(project.startDate,'date'))
+                    setIsValidStartDate(true)
                   newValue[1]
                     ?setProject({...project, startDate:newValue[0]._d, endDate:newValue[1]._d})
                     :setProject({...project, startDate:newValue[0]._d})

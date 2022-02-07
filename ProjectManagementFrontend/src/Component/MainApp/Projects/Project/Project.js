@@ -9,20 +9,19 @@ const Tasks = lazy(()=>import("../../Common/Tasks/Tasks"));
 const Loader = lazy(()=>import("../../../Common/loader"));
 
 export default function Project(props){
+    const [userInfo] = useState(props.userInfo?props.userInfo:null)
     const projectId = useLocation().state.id
     const [project, setProject]=useState(null);
     const [open,setOpen]=useState(false)
-    
     useEffect(()=>{
         axios.get('/project/getProject/'+projectId).then((res)=>{
             setProject(res.data)
-            console.log(res.data)
         })
     },[projectId])
     const handleClose = () => setOpen(false);
-    let handleOpen;
+    const [handleOpen, setHandleOpen]=useState(null);
     const getDataFromTasks=(openAddTask)=>{
-      handleOpen = openAddTask;
+      setHandleOpen({open:openAddTask});
     }
     return(
         <Suspense fallback={<Loader/>}>
@@ -32,8 +31,10 @@ export default function Project(props){
                 <Grid className="mainAppHeader" item container xs={12}>
                     <Grid item xs={6}><h3>Welcome {props.userInfo.username}</h3></Grid>
                     <Grid item xs={6} sx={{textAlign:'right',mt:'10px',pr:'20px'}}>
-                        <Button variant="contained" onClick={()=>setOpen(true)} sx={{mr:2}}><EditIcon/>Edit Project</Button>
-                        <Button variant="contained" onClick={()=>handleOpen(false)}><AddRoundedIcon/>Add Task </Button>
+                        {userInfo && userInfo.role ==='admin'
+                        ?<Button variant="contained" onClick={()=>setOpen(true)} sx={{mr:2}}><EditIcon/>Edit Project</Button>
+                        :''}
+                        <Button variant="contained" onClick={()=>handleOpen.open(false)}><AddRoundedIcon/>Add Task </Button>
                     </Grid>  
                     <Modal
                       open={open}

@@ -7,6 +7,7 @@ import ListItemText from "@mui/material/ListItemText";
 import Tooltip from "@mui/material/Tooltip";
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges'
 import EditIcon from '@mui/icons-material/Edit'
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded';
 import { Box, Grid, Modal, Switch, Typography } from "@mui/material";
 import moment from "moment";
 import * as React from "react";
@@ -15,6 +16,7 @@ import './Tasks.css'
 const AddOrEditTask = React.lazy(() => import("../AddOrEditTask/AddOrEditTask"));
 
 export default function Tasks(props){
+  const [userInfo] = React.useState(props.userInfo?props.userInfo:null)
   const [taskCategory, setTaskCategory] = React.useState('allTask')
   const [dataToggler,setDataToggler] = React.useState(true);
   const [isPersonal, setIsPersonal] = React.useState(false);
@@ -50,7 +52,6 @@ export default function Tasks(props){
         if(project) url = '/task/getAllTask/'+ project.id
         else url = '/task/getAllTask/null';
         axios.get(url).then((response)=>{
-          console.log(response.data)
           setTaskList(response.data)
         })
       } else if(taskCategory){
@@ -64,6 +65,12 @@ export default function Tasks(props){
     const nextTransission=(taskId)=>{
       if(window.confirm('Do you realy want to change transission of this task?'))
       axios.put('/task/nextTransission/'+taskId).then(()=>{
+        setDataToggler(!dataToggler)
+      })
+    }
+    const deleteTask=(taskId)=>{
+      if(window.confirm('Do you realy want to delete this task?'))
+      axios.delete('/task/deleteTask/'+taskId).then(()=>{
         setDataToggler(!dataToggler)
       })
     }
@@ -94,13 +101,24 @@ export default function Tasks(props){
                   taskList.map((task)=>(
                     <ListItem key={task._id}
                       secondaryAction={
+                        <div>
                         <Tooltip title="Next Transission" placement="top">
                           <span>
-                            <IconButton sx={{mr:1}} edge="end" onClick={()=>nextTransission(task._id)} disabled={task.transission==='completed'} label='changeTransission' aria-label="Transission">
+                            <IconButton sx={{mr:'-5px'}} edge="end" onClick={()=>nextTransission(task._id)} disabled={task.transission==='completed'} label='changeTransission' aria-label="Transission">
                               <PublishedWithChangesIcon/>
                             </IconButton>
                           </span>
                         </Tooltip>
+                        <Tooltip title="Delete Task" placement="top">
+                          <span>
+                            <IconButton sx={{mr:1}} edge="end" onClick={()=>deleteTask(task._id)} 
+                            disabled={!(task.isPersonal || userInfo && (userInfo.role==='admin' || userInfo.role==='manager'))} 
+                            label='changeTransission' aria-label="Transission">
+                              <DeleteOutlineRoundedIcon/>
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                        </div>
                       }
                     >
                       <Tooltip title="Edit Task" placement="top">

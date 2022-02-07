@@ -9,7 +9,6 @@ const People = React.lazy(() => import('./People/people'));
 
 export default function MainRoutes(props){
     const currentRoute = useLocation().pathname
-    console.log(currentRoute)
     const routes = ['/home','/people','/projects','/project']
     return(
 

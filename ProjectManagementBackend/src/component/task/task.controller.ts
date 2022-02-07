@@ -1,4 +1,4 @@
-import { Body, Controller, forwardRef, Get, Inject, Param, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Delete, forwardRef, Get, Inject, Param, Post, Put, Req } from '@nestjs/common';
 import { ObjectId } from 'mongoose';
 import { Role } from 'src/auth/role/role.enum';
 import { Roles } from 'src/auth/role/roles.decorator';
@@ -36,15 +36,18 @@ export class TaskController {
 
     @Put('nextTransission/:taskId')
     nextTransission(@Req() req, @Param('taskId') taskId: string){
-        console.log('nextTransission')
         return this.taskService.nextTransission(req.headers.authorization, taskId)
     }
 
     @Roles(Role.QA)
     @Put('changeTransission')
     changeTransission(@Body() task){
-        console.log(task)
         return this.taskService.changeTransission(task)
+    }
+
+    @Delete('deleteTask/:taskId')
+    deleteTask( @Param('taskId') taskId: string, @Req() req){
+        return this.taskService.deleteTask(taskId, req.headers.authorization)
     }
 
 }

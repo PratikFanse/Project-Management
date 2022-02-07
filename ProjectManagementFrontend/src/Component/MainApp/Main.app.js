@@ -8,7 +8,6 @@ const UserActions = React.lazy(() => import("./Common/UserActions/UserActions"))
 
 export default function MainApp(props){
     const user = useJwt(Cookies.get('access_token')).decodedToken
-    console.log(user)
     return(
 
         <React.Suspense fallback={<Loader/>}>

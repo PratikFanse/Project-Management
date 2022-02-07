@@ -24,7 +24,6 @@ export class UserController {
     @Public()
     @Post('login')
     async login(@Req() req: Request, @Res({passthrough:true}) res:Response) {
-      console.log('login',req.body.email)
       const user = await this.authService.validateUser(req.body.email, req.body.password);
       if (!user) {
         throw new UnauthorizedException();

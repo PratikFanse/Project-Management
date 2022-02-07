@@ -15,12 +15,13 @@ import { Link } from 'react-router-dom';
 const AddOrEditProject = React.lazy(() => import('./Project/AddOrEditProject'));
 
 export default function Projects(props){
-    const [userFilter, setUserFilter] = React.useState('allUser');
+    const [userInfo] = React.useState(props.userInfo?props.userInfo:null)
     const [open, setOpen] = React.useState(false);
     const [isEditProjectPage,setIsEditProjectPage] = React.useState(false)
     const [editProjectPageInfo,setEditProjectPageInfo] = React.useState('')
     const [projectRoute, setProjectRoute] = React.useState();
     const [projectId, setProjectId] = React.useState(null);
+    const [dataToggler, setDataToggler] = React.useState(true);
     const handleOpen = (isEdit,editTaskId) => {
       setEditProjectPageInfo(editTaskId?editTaskId:'');
       setIsEditProjectPage(isEdit)
@@ -30,10 +31,9 @@ export default function Projects(props){
     const [projectList, setProjectList] = React.useState([]);
     React.useEffect(() =>{
         axios.get('/project/getProjectList').then((res)=>{
-          console.log(res.data)
             setProjectList(res.data)
         })
-    },[])
+    },[dataToggler])
     const openProject =(id)=>{
       setProjectId({id})
     }
@@ -48,10 +48,12 @@ export default function Projects(props){
               <Grid item xs={6}>
                 <h1>Projects</h1>
               </Grid>
-              <Grid item xs={6} sx={{textAlign:'right',mt:3,pr:9}}>
-                    <Button variant="contained" onClick={()=>handleOpen(false)}
-                    ><AddRoundedIcon/>Add Project </Button>
-              </Grid>  
+              {userInfo && userInfo.role ==='admin' 
+                ?<Grid item xs={6} sx={{textAlign:'right',mt:3,pr:9}}>
+                      <Button variant="contained" onClick={()=>handleOpen(false)}
+                      ><AddRoundedIcon/>Add Project </Button>
+                </Grid>:''
+              }  
             </Grid>
             <Grid item sx={{m:2,mr:4}} xs={12}>
               <TableContainer component={Paper}>
@@ -87,7 +89,7 @@ export default function Projects(props){
                 // aria-describedby="modal-modal-description"
                 >
                   <Box>
-                    <AddOrEditProject isEditTask={isEditProjectPage} editProjectPageInfo={editProjectPageInfo} handleClose={handleClose}/>
+                    <AddOrEditProject isEditTask={isEditProjectPage} editProjectPageInfo={editProjectPageInfo} dataToggler={{dataToggler:dataToggler, setDataToggler:setDataToggler}} handleClose={handleClose}/>
                   </Box>
               </Modal>
             </Grid>

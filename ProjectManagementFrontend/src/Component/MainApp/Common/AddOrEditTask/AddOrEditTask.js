@@ -6,7 +6,7 @@ import DateRangePicker from '@mui/lab/DateRangePicker';
 import DateAdapter from '@mui/lab/AdapterMoment';
 import validator from "validator";
 import axios from "axios";
-import { isMoment } from "moment";
+import moment, { isMoment } from "moment";
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ModelTrainingIcon from '@mui/icons-material/ModelTraining';
 import ManageSearchIcon from '@mui/icons-material/ManageSearch';
@@ -100,12 +100,14 @@ export default function AddOrEditTask(props){
     if(dateRange){
       if(isMoment(dateRange[0]) && isMoment(dateRange[1]) &&
         dateRange[0].isSameOrBefore(dateRange[1],'date')){
-          setValidations({...validations,dateRange:true})
+          if(isValidStartDate && dateRange[0].isSameOrAfter(new Date(),'date'))
+            setValidations({...validations,dateRange:true})
+          else
+            setValidations({...validations,dateRange:false})
         } else {
           setValidations({...validations,dateRange:false})  
         }
     } else{
-      console.log(ev.target.name,task.isPersonal && ev.target.value!=='none')
       if(ev.target.name === 'title'){
         setValidations({...validations, title:validator.isLength(ev.target.value,{min:3})})
       } else if(ev.target.name === 'project' || ev.target.name === 'owner'){
@@ -124,7 +126,6 @@ export default function AddOrEditTask(props){
           delete newTask['project']
           delete newTask['owner']
         }
-        console.log(newTask)
         axios.post('/task/addNewTask',newTask).then((res)=>{
           props.reRenderTask('')
           props.reRenderTask('allTask')
@@ -136,7 +137,6 @@ export default function AddOrEditTask(props){
   }
   const updateTask=(ev)=>{
     ev.preventDefault();
-    console.log(validations)
     if(validations.title && validations.dateRange && 
       (task.isPersonal||(!task.isPersonal && task.project!=='none' && task.owner!=='none'))){
         let newTask = {...task}
@@ -144,7 +144,6 @@ export default function AddOrEditTask(props){
           delete newTask['project']
           delete newTask['owner']
         }
-        console.log(newTask)
         axios.post('/task/updateTask',newTask).then((res)=>{
           props.reRenderTask('')
           props.reRenderTask('allTask')
@@ -189,6 +188,8 @@ export default function AddOrEditTask(props){
               value={[task.startDate,task.endDate]}
               // minDate={new Date()}
               onChange={(newValue) => {
+                if(!moment(newValue[0]).isSame(task.startDate,'date'))
+                  setIsValidStartDate(true)
                 newValue[1]
                   ?setTask({...task, startDate:newValue[0]._d, endDate:newValue[1]._d})
                   :setTask({...task, startDate:newValue[0]._d})

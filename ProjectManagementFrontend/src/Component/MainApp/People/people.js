@@ -3,7 +3,7 @@ import axios from 'axios';
 import * as React from 'react';
 import { useNavigate } from 'react-router';
 import './people.css'
-import '../Home/Home.css'
+import '../Common/Tasks/Tasks.css'
 
 export default function People(props){
     const navigate = useNavigate();
@@ -27,7 +27,6 @@ export default function People(props){
         setUserFilter(event.target.value);
     };
     const changeRole =(userId,ev)=>{
-        console.log(ev.target.value, userId)
         const newRole = {userId: userId, role:ev.target.value}
         axios.put('/user/updateUserRole/',newRole).then((res)=>{
             setToggle(!toggle)

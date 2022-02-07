@@ -16,7 +16,6 @@ export class TaskService {
 
     async createNewTask(newTask:Task, userToken) {
         const creator = await this.usersService.getUserFormToken(userToken)
-        console.log(newTask)
         const isValidData = newTask && newTask.title && newTask.startDate && newTask.endDate && creator && 
                 (newTask.isPersonal || (!newTask.isPersonal && newTask.project &&newTask.owner))
         if(isValidData){
@@ -59,18 +58,17 @@ export class TaskService {
         const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
         let query={};
         if(userInfo.role==Role.Admin){
-            query={id:task._id, $or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
+            query={_id:task._id, $or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
         } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
             const projects =await this.projectService.userProjects(user)
-            query={id:task._id, $or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
+            query={_id:task._id, $or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
         } else {
-            query= {id:task._id, $or:[{createdBy: user},{owner:user}]}
+            query= {_id:task._id, $or:[{createdBy: user},{owner:user}]}
         }
         await this.Task.updateOne(query,{$set:{...task}}).exec() 
     }
 
     async getTaskListByCategory(userToken: any, category: String, projectId) {
-        console.log(category)
         const user = await this.usersService.getUserFormToken(userToken)
         const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
         let query ={}
@@ -155,7 +153,7 @@ export class TaskService {
                 )
             );
         if(task.project && task.project!=='none'){
-            task['projectList']=await this.projectService.getProjectList()
+            task['projectList']=await this.projectService.getProjectList(userToken)
             task['memberList']=await this.projectService.getProjectMembers(task.project)
         }
         if(task) 
@@ -186,6 +184,15 @@ export class TaskService {
 
     async changeTransission(taskTransission) {
         await this.Task.updateOne({_id:taskTransission.taskId},{$set:{transission:taskTransission.transission}});
+    }
+
+    async deleteTask(taskId, userToken) {
+        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
+        if(userInfo.role==="admin"){
+            await this.Task.deleteOne({_id:taskId})
+        } else {
+            await this.Task.deleteOne({_id:taskId, isPersonal:true})
+        }
     }
 
 }

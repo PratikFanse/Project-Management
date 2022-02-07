@@ -18,7 +18,6 @@ export class UserService {
 
   async getUsersList(usersFilter) {
     const query ={}
-    console.log(usersFilter)
     if(usersFilter!=='allUser'){
       query['role']=usersFilter
     }
@@ -35,7 +34,6 @@ export class UserService {
           password:passwordHash,
           birthDate: user.dob
         })
-        console.log(newUser)
         return {isCreated: await newUser.save() ? true : false}
       } catch(e){
         throw new BadRequestException();
