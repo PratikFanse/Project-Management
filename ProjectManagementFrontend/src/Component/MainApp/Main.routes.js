@@ -15,13 +15,13 @@ export default function MainRoutes(props){
 
         <React.Suspense fallback={<Loader/>}>
             <Routes> 
-                <Route path="/" exact element={<Home  userInfo={props.userInfo}/>}>
-                    {window.history.pushState({},'','/home')}
-                </Route>
                 <Route path="/home" exact element={<Home  userInfo={props.userInfo}/>}/>
                 <Route path="/people" exact element={<People userInfo={props.userInfo}/>}/>
                 <Route path="/projects" exact element={<Projects userInfo={props.userInfo}/>}/>
                 <Route path="/project" exact element={<Project userInfo={props.userInfo}/>}/>
+                <Route path="/" exact element={<Home  userInfo={props.userInfo}/>}>
+                    {currentRoute==='/'?window.history.pushState({},'','/home'):''}
+                </Route>
                 <Route path="*" exact element={<Page404/>}>
                     {routes.includes(currentRoute)?'':window.history.pushState({},'','/404')}
                 </Route>

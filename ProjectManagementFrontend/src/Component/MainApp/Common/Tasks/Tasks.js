@@ -97,7 +97,7 @@ export default function Tasks(props){
                 </Grid>
             </Grid>
             <Grid className="taskList" item xs={12}>
-                {
+                { taskList.length?
                   taskList.map((task)=>(
                     <ListItem key={task._id}
                       secondaryAction={
@@ -170,9 +170,8 @@ export default function Tasks(props){
                           {/* <ListItemText secondary={"test"}/> */}                                                                              
                         </ListItemButton>
                       </Tooltip>
-                        
                     </ListItem>
-                  ))
+                  )):<Grid className="noFound" item xs={12}>There is no task for now, please create new task.</Grid>
                 }
               </Grid>
               <Modal

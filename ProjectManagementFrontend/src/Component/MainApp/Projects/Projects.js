@@ -68,19 +68,28 @@ export default function Projects(props){
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {projectList.map((project) => (
-                        <StyledTableRow onClick={()=>openProject(project._id)} hover className='projectRow' key={project._id}>
-                          <StyledTableCell component="th" scope="row">
-                              {project.title}
-                            </StyledTableCell>
-                            <StyledTableCell align="right">{project.status}</StyledTableCell>
-                            <StyledTableCell align="right">{project.owner.username}</StyledTableCell>
-                            <StyledTableCell align="right">{moment(project.startDate).format('MMM-DD-YYYY')}</StyledTableCell>
-                            <StyledTableCell align="right">{moment(project.endDate).format('MMM-DD-YYYY')}</StyledTableCell>
-                        </StyledTableRow>
+                    {
+                      projectList.map((project) => (
+                          <StyledTableRow onClick={()=>openProject(project._id)} hover className='projectRow' key={project._id}>
+                            <StyledTableCell component="th" scope="row">
+                                {project.title}
+                              </StyledTableCell>
+                              <StyledTableCell align="right">{project.status}</StyledTableCell>
+                              <StyledTableCell align="right">{project.owner.username}</StyledTableCell>
+                              <StyledTableCell align="right">{moment(project.startDate).format('MMM-DD-YYYY')}</StyledTableCell>
+                              <StyledTableCell align="right">{moment(project.endDate).format('MMM-DD-YYYY')}</StyledTableCell>
+                          </StyledTableRow>
                     ))}
                   </TableBody>
                 </Table>
+                {projectList.length?
+                  '':
+                  <TableContainer>
+                    <div className='noData'>
+                        There is no task for now, please create new task.
+                    </div>
+                  </TableContainer>
+                }
               </TableContainer>
               <Modal
                 open={open}

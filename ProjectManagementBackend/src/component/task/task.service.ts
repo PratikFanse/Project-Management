@@ -100,16 +100,16 @@ export class TaskService {
                 return {$or:[{createdBy: userId, isPersonal:true},{owner:userId},{isPersonal:false}]}
         } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
             if(projectId && projectId!=='null')
-                return {project:projectId, $or:[{createdBy: userId},{owner:userId}]}
+                return {project:projectId, $or:[{createdBy: userId},{owner:userId},{isPersonal:false}]}
             else{
                 const projects =await this.projectService.userProjects(userId)
                 return {$or:[{createdBy: userId},{owner:userId},{project:{$in:projects}}]}
             }
         } else {
             if(projectId && projectId!=='null')
-                return {project:projectId, $or:[{createdBy: userId},{owner:userId}]}
+                return {project:projectId, $or:[{createdBy: userId, isPersonal:true},{owner:userId}]}
             else
-                return {$or:[{createdBy: userId},{owner:userId}]}
+                return {$or:[{createdBy: userId, isPersonal:true},{owner:userId}]}
         }
     }
 
@@ -121,16 +121,16 @@ export class TaskService {
                 return {transission:category ,$or:[{createdBy: userId, isPersonal:true},{owner:userId},{isPersonal:false}]}
         } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
             if(projectId && projectId!=='null')
-                return {project:projectId, transission:category , $or:[{createdBy: userId},{owner:userId}]}
+                return {project:projectId, transission:category, $or:[{createdBy: userId},{owner:userId},{isPersonal:false}]}
             else{
                 const projects =await this.projectService.userProjects(userId)
                 return {transission:category , $or:[{createdBy: userId},{owner:userId},{project:{$in:projects}}]}
             }
         } else {
             if(projectId && projectId!=='null')
-                return {project:projectId, transission:category ,$or:[{createdBy: userId},{owner:userId}]}
+                return {project:projectId, transission:category ,$or:[{createdBy: userId, isPersonal:true},{owner:userId}]}
             else
-                return {transission:category ,$or:[{createdBy: userId},{owner:userId}]}
+                return {transission:category ,$or:[{createdBy: userId, isPersonal:true},{owner:userId}]}
         }
     }
 
@@ -188,7 +188,7 @@ export class TaskService {
 
     async deleteTask(taskId, userToken) {
         const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
-        if(userInfo.role==="admin"){
+        if(userInfo.role==="admin" || userInfo.role==="manager"){
             await this.Task.deleteOne({_id:taskId})
         } else {
             await this.Task.deleteOne({_id:taskId, isPersonal:true})

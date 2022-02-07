@@ -57,3 +57,8 @@
 .taskDate{
     font-size: 15px;
 }
+.noFound{
+    color: #555555;
+    text-align: center;
+    margin-top: 200px;
+}

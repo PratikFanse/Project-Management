@@ -17,7 +17,7 @@ export default function PublicRoutes(props){
                 <Route path="/signup" exact element={<Signup/>}/>
                 <Route path="/forgotPassword" exact element={<ForgotPassword  notification={props.notifyOTP}/>}/>
                 <Route path="/resetPassword" exact element={<ResetPassword notification={props.passChanged}/>}/>
-                <Route path="/" exact element={<Login/>}>{window.history.pushState({},'','/login')}</Route>
+                <Route path="/" exact element={<Login/>}>{currentRoute==='/'?window.history.pushState({},'','/login'):''}</Route>
                 <Route path="*" exact element={<Page404/>}>
                     {routes.includes(currentRoute)?'':window.history.pushState({},'','/404')}
                 </Route>
