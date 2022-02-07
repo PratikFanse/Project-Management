@@ -7,7 +7,7 @@ const PublicRoutes = lazy(() => import("./Public.routes"))
 
 export default function PublicApp(props){
     const currentRoute = useLocation().pathname
-    const publicRoutes=['/login','/signup','/forgotPassword','/resetPassword']
+    const publicRoutes=['/','/login','/signup','/forgotPassword','/resetPassword'];
     const [open, setOpen] = React.useState(false);
     const [transission, setTransission] = React.useState(undefined);
     const [notifyText, setNotifyText] = React.useState('')
@@ -25,6 +25,8 @@ export default function PublicApp(props){
     };
     return(
         <Suspense fallback={<Loader/>}>
+        {
+        publicRoutes.includes(currentRoute)?
             <header className="PublicAppHeader">
                 <Grid className='publicScreen' container spacing={2}>
                     <Grid item xs={1}></Grid>
@@ -48,6 +50,8 @@ export default function PublicApp(props){
                     </Snackbar>
                 </Grid>
             </header>
+        :<PublicRoutes notifyOTP={otpSent} passChanged={passwordChanged}/>
+        }
         </Suspense>
     )
 }

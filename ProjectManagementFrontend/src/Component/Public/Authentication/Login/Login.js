@@ -41,6 +41,7 @@ export default function Login(props){
             // axios.get('/user/logout')
             axios.post('/user/login',cred)
                 .then(response =>{
+                    window.history.pushState({},'','/');
                     window.location.reload();
                 }).catch( ()=>{
                     // const validations = {...validation};

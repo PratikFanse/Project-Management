@@ -28,6 +28,7 @@ export default function UserActions(props) {
       axios.get('/user/logout').then(()=>{
         if(Cookies.get('access_token'))
           Cookies.remove('access_token',{path:''})
+          window.history.pushState({},'','/');
           window.location.reload()
       })
   }
