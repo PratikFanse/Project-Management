@@ -1,5 +1,5 @@
 {
-  "name": "todo-backend",
+  "name": "Project-Management-backend",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -29,6 +29,7 @@
     "@nestjs/mongoose": "^9.0.2",
     "@nestjs/passport": "^8.0.1",
     "@nestjs/platform-express": "^8.0.0",
+    "@nestjs/serve-static": "^2.2.2",
     "bcrypt": "^5.0.1",
     "cookie-parser": "^1.4.6",
     "moment": "^2.29.1",
@@ -36,6 +37,7 @@
     "nodemailer": "^6.7.2",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
+    "redis": "^4.0.3",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"

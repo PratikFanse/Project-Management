@@ -11,12 +11,18 @@ import { OtpModule } from 'src/auth/otp/otp.module';
 import { TaskModule } from '../task/task.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { ProjectModule } from '../project/project.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 @Module({
   imports: [ 
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.DATABASE_CONNECTION),
     AuthModule,
-    OtpModule,TaskModule,ProjectModule
+    OtpModule,TaskModule,ProjectModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'build'),
+    })
    ],
   controllers: [AppController],
   providers: [
