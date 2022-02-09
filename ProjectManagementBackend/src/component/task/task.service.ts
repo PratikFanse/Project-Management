@@ -7,12 +7,17 @@ import { UserService } from '../users/user.service';
 import { Task } from './models/task.model';
 import * as jwt from 'jsonwebtoken';
 import { Role } from 'src/auth/role/role.enum';
+import { createClient } from 'redis';
+import { RedisConnection } from '../redis/redis.model';
 
 @Injectable()
 export class TaskService {
+
     constructor(@InjectModel('Task') private readonly Task: Model<Task>,
     @Inject(forwardRef(() => UserService))private usersService: UserService,
-    @Inject(forwardRef(() => ProjectService))private projectService: ProjectService ){}
+    @Inject(forwardRef(() => ProjectService))private projectService: ProjectService,
+    // @Inject(forwardRef(() => RedisService))private readonly redisService: RedisService,
+     ){}
 
     async createNewTask(newTask:Task, userToken) {
         const creator = await this.usersService.getUserFormToken(userToken)
@@ -27,31 +32,6 @@ export class TaskService {
         } else 
             throw new BadRequestException();
     }
-
-    // async getAllTask(userToken, projectId){
-    //     const user = await this.usersService.getUserFormToken(userToken)
-    //     const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
-    //     let query={};
-    //     if(userInfo.role==Role.Admin){
-    //         if(projectId && projectId!=='null')
-    //             query={project:projectId, $or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
-    //         else    
-    //             query={$or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
-    //     } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
-    //         const projects =await this.projectService.userProjects(user)
-    //         if(projectId && projectId!=='null')
-    //             query={project:projectId, $or:[{createdBy: user},{owner:user}]}
-    //         else
-    //             query={$or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
-    //     } else {
-    //         if(projectId && projectId!=='null')
-    //             query= {project:projectId, $or:[{createdBy: user},{owner:user}]}
-    //         else
-    //             query= {$or:[{createdBy: user},{owner:user}]}
-    //     }
-    //     const taskList:Task[] = await this.Task.find(query).populate('project', 'title', 'Project').sort({endDate: 1}).exec() as Task[]
-    //     return taskList ? taskList: []
-    // }
 
     async updateTask(task, userToken){
         const user = await this.usersService.getUserFormToken(userToken)
