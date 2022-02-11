@@ -1,65 +1,57 @@
 import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
-import { Model, ObjectId } from 'mongoose';
+import { Model } from 'mongoose';
 import { ProjectService } from '../project/project.service';
-import { UserService } from '../users/user.service';
 import { Task } from './models/task.model';
-import * as jwt from 'jsonwebtoken';
 import { Role } from 'src/auth/role/role.enum';
-import { createClient } from 'redis';
 import { RedisConnection } from '../redis/redis.model';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class TaskService {
-
+    private redis = new RedisConnection().getConnection()
     constructor(@InjectModel('Task') private readonly Task: Model<Task>,
-    @Inject(forwardRef(() => UserService))private usersService: UserService,
     @Inject(forwardRef(() => ProjectService))private projectService: ProjectService,
-    // @Inject(forwardRef(() => RedisService))private readonly redisService: RedisService,
-     ){}
+     ){
+        this.setTasksInRedis()
+     }
 
     async createNewTask(newTask:Task, userToken) {
-        const creator = await this.usersService.getUserFormToken(userToken)
+        const creator = JSON.parse(await this.redis.get(userToken.replace('Bearer ','')));
         const isValidData = newTask && newTask.title && newTask.startDate && newTask.endDate && creator && 
                 (newTask.isPersonal || (!newTask.isPersonal && newTask.project &&newTask.owner))
         if(isValidData){
             const task = new this.Task({
                 ...newTask,
-                createdBy:creator
+                createdBy:creator.id
             });
+            newTask = await task.save() as Task
             await task.save()
+            await this.redisTaskUpdateById(task._id)
         } else 
             throw new BadRequestException();
     }
 
     async updateTask(task, userToken){
-        const user = await this.usersService.getUserFormToken(userToken)
-        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
+        const user = JSON.parse(await this.redis.get(userToken.replace('Bearer ','')));
         let query={};
-        if(userInfo.role==Role.Admin){
-            query={_id:task._id, $or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
-        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
-            const projects =await this.projectService.userProjects(user)
-            query={_id:task._id, $or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
+        if(user.role==Role.Admin){
+            query={_id:task._id, $or:[{createdBy: user.id, isPersonal:true},{owner:user.id},{isPersonal:false}]}
+        } else if(user.role===Role.Manager || user.role===Role.QA){
+            const projects =await this.projectService.userProjects(user.id)
+            query={_id:task._id, $or:[{createdBy: user.id},{owner:user.id},{project:{$in:projects}}]}
         } else {
-            query= {_id:task._id, $or:[{createdBy: user},{owner:user}]}
+            query= {_id:task._id, $or:[{createdBy: user.id},{owner:user.id}]}
         }
-        await this.Task.updateOne(query,{$set:{...task}}).exec() 
+        await this.Task.updateOne(query,{$set:{...task}}).exec()
+        await this.redisTaskUpdateById(task._id)
     }
 
     async getTaskListByCategory(userToken: any, category: String, projectId) {
-        const user = await this.usersService.getUserFormToken(userToken)
-        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
-        let query ={}
-        if(category=="pending" || category==="allTask"){
-            query = await this.pendingOrAllTask(userInfo, user, projectId)
-        } else if(category=="isPersonal") {
-            query= {isPersonal:true , createdBy: user};
-        } else{
-            query= await this.otherCategory(category, userInfo, user, projectId)
-        }
-        const taskList:Task[] = await this.Task.find(query).populate('project', 'title', 'Project').sort({endDate: 1}).exec() as Task[]
+        const user = JSON.parse(await this.redis.get(userToken.replace('Bearer ','')));
+        const taskList:Task[] =[]
+        taskList.push(...await this.getByCategory(category, user.role, user.id, projectId))
         if(category=="pending"){
             let pendingTasks =[]
             taskList.map((task)=>{
@@ -72,59 +64,50 @@ export class TaskService {
             return taskList ? taskList: []
     }
 
-    async pendingOrAllTask(userInfo,userId,projectId){
-        if(userInfo.role==Role.Admin){
-            if(projectId && projectId!=='null')
-                return {project:projectId, $or:[{createdBy: userId, isPersonal:true},{owner:userId},{isPersonal:false}]}
-            else    
-                return {$or:[{createdBy: userId, isPersonal:true},{owner:userId},{isPersonal:false}]}
-        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
-            if(projectId && projectId!=='null')
-                return {project:projectId, $or:[{createdBy: userId},{owner:userId},{isPersonal:false}]}
-            else{
-                const projects =await this.projectService.userProjects(userId)
-                return {$or:[{createdBy: userId},{owner:userId},{project:{$in:projects}}]}
+    async getByCategory(category, role, userId, projectId){
+        let taskKeys = [];
+        if(category=="pending" || category==="allTask")
+            taskKeys = await this.redis.keys("task_*")
+        else if(category==="isPersonal")
+            taskKeys = await this.redis.keys("task_personal_*")
+        else 
+            taskKeys = await this.redis.keys("task_"+category+"*")
+        let taskList =[];
+        let projects =[];
+        if(role!==Role.Admin)
+            projects.push(...await this.projectService.userProjects(userId));
+        for(const taskKey of taskKeys) {
+            const task = JSON.parse(await this.redis.get(taskKey))
+            const isPersonal = task.createdBy===userId && task.isPersonal
+            if(role!==Role.Employee){
+                if((task.project && projectId && task.project._id===projectId )){
+                    taskList.push(task);
+                } else if(!projectId || projectId==='null') {
+                    if(role!==Role.Admin && (category!=="isPersonal" && task.project && projects.includes(task.project._id)) || isPersonal){
+                        taskList.push(task);
+                    } else if((isPersonal || (category!=="isPersonal" && !task.isPersonal)))
+                        taskList.push(task);
+                } 
+            } else {
+                const searchCondition =task.project && task.owner && ((projectId && task.project===projectId) || projectId ==='null' && projects.includes(task.project._id))
+                if( (category!=="isPersonal" && searchCondition) || isPersonal){
+                    taskList.push(task)
+                }
             }
-        } else {
-            if(projectId && projectId!=='null')
-                return {project:projectId, $or:[{createdBy: userId, isPersonal:true},{owner:userId}]}
-            else
-                return {$or:[{createdBy: userId, isPersonal:true},{owner:userId}]}
         }
-    }
-
-    async otherCategory(category, userInfo, userId, projectId){
-        if(userInfo.role==Role.Admin){
-            if(projectId && projectId!=='null')
-                return {project:projectId, transission:category ,$or:[{createdBy: userId, isPersonal:true},{owner:userId},{isPersonal:false}]}
-            else
-                return {transission:category ,$or:[{createdBy: userId, isPersonal:true},{owner:userId},{isPersonal:false}]}
-        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
-            if(projectId && projectId!=='null')
-                return {project:projectId, transission:category, $or:[{createdBy: userId},{owner:userId},{isPersonal:false}]}
-            else{
-                const projects =await this.projectService.userProjects(userId)
-                return {transission:category , $or:[{createdBy: userId},{owner:userId},{project:{$in:projects}}]}
-            }
-        } else {
-            if(projectId && projectId!=='null')
-                return {project:projectId, transission:category ,$or:[{createdBy: userId, isPersonal:true},{owner:userId}]}
-            else
-                return {transission:category ,$or:[{createdBy: userId, isPersonal:true},{owner:userId}]}
-        }
+        return taskList
     }
 
     async getTaskById(userToken, taskId){
-        const user = await this.usersService.getUserFormToken(userToken)
-        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
+        const user = JSON.parse(await this.redis.get(userToken.replace('Bearer ','')));
         let query ={}
-        if(userInfo.role==Role.Admin){
-            query={_id:taskId, $or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
-        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
-            const projects =await this.projectService.userProjects(user)
-            query={_id:taskId, $or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
+        if(user.role==Role.Admin){
+            query={_id:taskId, $or:[{createdBy: user.id, isPersonal:true},{owner:user.id},{isPersonal:false}]}
+        } else if(user.role===Role.Manager || user.role===Role.QA){
+            const projects =await this.projectService.userProjects(user.id)
+            query={_id:taskId, $or:[{createdBy: user.id},{owner:user.id},{project:{$in:projects}}]}
         } else {
-            query= {_id:taskId, $or:[{createdBy: user},{owner:user}]}
+            query= {_id:taskId, $or:[{createdBy: user.id},{owner:user.id}]}
         }
         const task = 
             JSON.parse(
@@ -144,35 +127,59 @@ export class TaskService {
 
     async nextTransission(userToken: any, taskId: string) {
         const transission = ['todo','inprogress','review','completed'];
-        const user = await this.usersService.getUserFormToken(userToken)
-        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
+        const user = JSON.parse(await this.redis.get(userToken.replace('Bearer ','')));
         let query ={}
-        if(userInfo.role==Role.Admin){
-            query={_id:taskId, $or:[{createdBy: user, isPersonal:true},{owner:user},{isPersonal:false}]}
-        } else if(userInfo.role===Role.Manager || userInfo.role===Role.QA){
-            const projects =await this.projectService.userProjects(user)
-            query={_id:taskId, $or:[{createdBy: user},{owner:user},{project:{$in:projects}}]}
+        if(user.role==Role.Admin){
+            query={_id:taskId, $or:[{createdBy: user.id, isPersonal:true},{owner:user.id},{isPersonal:false}]}
+        } else if(user.role===Role.Manager || user.role===Role.QA){
+            const projects =await this.projectService.userProjects(user.id)
+            query={_id:taskId, $or:[{createdBy: user.id},{owner:user.id},{project:{$in:projects}}]}
         } else {
-            query= {_id:taskId, $or:[{createdBy: user},{owner:user}]}
+            query= {_id:taskId, $or:[{createdBy: user.id},{owner:user.id}]}
         }
         const task = await this.Task.findOne(query).exec();
         if(task.transission!=='completed'){
             task.transission = transission[transission.indexOf(task.transission)+1];
-            task.save();
+            await task.save();
+            await this.redisTaskUpdateById(taskId)
         }
     }
 
     async changeTransission(taskTransission) {
         await this.Task.updateOne({_id:taskTransission.taskId},{$set:{transission:taskTransission.transission}});
+        await this.redisTaskUpdateById(taskTransission.taskId)
     }
 
     async deleteTask(taskId, userToken) {
-        const userInfo = JSON.parse(JSON.stringify(jwt.decode(userToken.replace('Bearer ',''))))
-        if(userInfo.role==="admin" || userInfo.role==="manager"){
+        const userRole = JSON.parse(await this.redis.get(userToken.replace('Bearer ',''))).role;
+        if(userRole==="admin" || userRole==="manager"){
             await this.Task.deleteOne({_id:taskId})
         } else {
             await this.Task.deleteOne({_id:taskId, isPersonal:true})
         }
+        this.redis.del(await this.redis.keys('task_*'+taskId))
+    }
+
+    @Cron('0 0 5 * * *')
+    async setTasksInRedis(){
+        const taskList:Task[] = await this.Task.find().populate('project', 'title', 'Project').sort({endDate: 1}).exec() as Task[]
+        await this.redis.del(await this.redis.keys('task_*'))
+        taskList.map(async (task)=>{
+            if(task.isPersonal)
+                await this.redis.set('task_personal_'+task.transission+"_"+task.id,JSON.stringify(task))
+            else
+                await this.redis.set('task_'+task.transission+"_"+task.id,JSON.stringify(task))
+            // await this.redis.set('task_'+task.id,JSON.stringify(task))
+        })
+    }
+
+    async redisTaskUpdateById(taskId) {
+        const task = await this.Task.findById(taskId).populate('project', 'title', 'Project').exec() as Task
+        await this.redis.del(await this.redis.keys('task_*'+task.id,JSON.stringify(task)))
+        if(task.isPersonal)
+            await this.redis.set('task_personal_'+task.transission+"_"+task.id,JSON.stringify(task))
+        else
+            await this.redis.set('task_'+task.transission+"_"+task.id,JSON.stringify(task))
     }
 
 }

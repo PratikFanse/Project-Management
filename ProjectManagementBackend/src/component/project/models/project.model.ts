@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 import { User } from '../../users/models/user.model';
-
+const ObjectId = mongoose.Schema.Types.ObjectId;
 export const ProjectScema = new mongoose.Schema({
     title: { type: String, required:true},
     startDate: {type: Date, required:true},

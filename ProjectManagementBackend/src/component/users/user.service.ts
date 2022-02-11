@@ -3,18 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './models/user.model';
 import * as bcrypt from 'bcrypt';
-import { Role } from 'src/auth/role/role.enum';
 import { OTPService } from 'src/auth/otp/otp.service';
 import { ResetPassword } from './models/resetPassword.model';
 import { NewUser } from './models/newUser.model';
 import * as jwt from 'jsonwebtoken'
-import { JwtModuleOptions } from '@nestjs/jwt';
 @Injectable()
 export class UserService {
   constructor(@InjectModel('User') private readonly User: Model<User>, 
-  @Inject(forwardRef(() => OTPService))private otpService:OTPService){
-    // this.creatUser()
-  }
+  @Inject(forwardRef(() => OTPService))private otpService:OTPService){}
 
   async getUsersList(usersFilter) {
     const query ={}
@@ -81,17 +77,6 @@ export class UserService {
     this.User.updateOne({_id:newRole.userId},{$set:{role:newRole.role}}).exec()
   }
 
-  async getUserFormToken(jwtToken:string) {
-    if(jwtToken){
-      const userInfo = jwt.decode(jwtToken.replace('Bearer ',''))
-      const user = await this.User.findOne({email: userInfo.sub}).exec() as User
-      if(user)
-        return user.id
-      else
-        throw new NotFoundException();
-    } else 
-      throw new BadRequestException();
-  }
 
   async encrypt(text){
     const salt = await bcrypt.genSalt(10)

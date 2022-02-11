@@ -30,7 +30,7 @@ export class ProjectController {
         return this.projectService.getProject(projectId, req.headers.authorization)
     }
 
-    @Roles(Role.Admin)
+    @Roles(Role.Manager)
     @Put('updateProject')
     updateProject(@Body() project){
         this.projectService.updateProject(project)

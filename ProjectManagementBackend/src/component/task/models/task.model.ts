@@ -26,4 +26,5 @@ export interface Task{
     project: Project;
     isPersonal: boolean;
     transission:string;
+    createdBy:User;
 }

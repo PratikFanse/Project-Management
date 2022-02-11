@@ -13,6 +13,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { ProjectModule } from '../project/project.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [ 
@@ -20,6 +21,7 @@ import { join } from 'path';
     MongooseModule.forRoot(process.env.DATABASE_CONNECTION),
     AuthModule,
     OtpModule,TaskModule,ProjectModule,
+    ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'build'),
     })

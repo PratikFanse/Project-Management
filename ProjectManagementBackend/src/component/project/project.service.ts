@@ -1,30 +1,27 @@
-import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-// import { ObjectId } from 'mongodb';
 import { Model } from 'mongoose';
-// import * as mongoose from 'mongoose';
-// import { Role } from 'src/auth/role/role.enum';
+import { RedisConnection } from '../redis/redis.model';
 import { User } from '../users/models/user.model';
-import { UserService } from '../users/user.service';
 import { Project } from './models/project.model';
 
 @Injectable()
 export class ProjectService {
-    constructor(@InjectModel('Project') private readonly Project: Model<Project>,
-    @Inject(forwardRef(() => UserService))private usersService: UserService){}
+    private redis = new RedisConnection().getConnection()
+    constructor(@InjectModel('Project') private readonly Project: Model<Project>){}
 
     async createProject(project, userToken){
-        const creator = await this.usersService.getUserFormToken(userToken)
+        const creator = JSON.parse(await this.redis.get(userToken.replace('Bearer ','')));
         const isValidData = project && project.title && project.startDate && project.endDate && creator
         if(isValidData){
-            const newProject = new this.Project({...project,owner:creator});
+            const newProject = new this.Project({...project,owner:creator.id});
             await newProject.save();
         } else
             throw new BadRequestException();
     }
 
     async getProjectList(userToken){
-        const userId = await this.usersService.getUserFormToken(userToken)
+        const userId = JSON.parse(await this.redis.get(userToken.replace('Bearer ',''))).id;
         const projectList:Project[] = 
             await this.Project.find({isActive:true, $or:[{members:userId},{owner:userId}]})
             .populate('owner','username email role','User').exec() as Project[]
@@ -58,7 +55,7 @@ export class ProjectService {
     }
 
     async getProject(projectId: string, userToken) {
-        const userId = await this.usersService.getUserFormToken(userToken);
+        const userId = JSON.parse(await this.redis.get(userToken.replace('Bearer ',''))).id;
         const project = await this.Project.findOne({_id:projectId, 
             $or:[{members:userId},{owner:userId}]
         }).exec() as Project

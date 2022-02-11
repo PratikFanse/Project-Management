@@ -8,73 +8,76 @@ import { UserService } from './user.service';
 import { OTPService } from 'src/auth/otp/otp.service';
 import { ResetPassword } from './models/resetPassword.model';
 import { NewUser } from './models/newUser.model';
+import { RedisConnection } from '../redis/redis.model';
 
 
 @Controller('user')
 export class UserController {
+  private redis = new RedisConnection().getConnection()
+  constructor(private authService: AuthService, private userService: UserService, private otpService:OTPService){}
 
-    constructor(private authService: AuthService, private userService: UserService, private otpService:OTPService){}
+  @Post('signin')
+  @Public()
+  createUser(@Body() newUser: any){
+    return this.userService.createNewUser(newUser)
+  }
 
-    @Post('signin')
-    @Public()
-    createUser(@Body() newUser: any){
-      return this.userService.createNewUser(newUser)
+  @Public()
+  @Post('login')
+  async login(@Req() req: Request, @Res({passthrough:true}) res:Response) {
+    const user = await this.authService.validateUser(req.body.email, req.body.password);
+    if (!user) {
+      throw new UnauthorizedException();
     }
-
-    @Public()
-    @Post('login')
-    async login(@Req() req: Request, @Res({passthrough:true}) res:Response) {
-      const user = await this.authService.validateUser(req.body.email, req.body.password);
-      if (!user) {
-        throw new UnauthorizedException();
-      }
-      const access_token = this.authService.login(user).access_token;
-      // res.cookie("access_token",this.authService.login(req.user).access_token,{maxAge: 24 *60 * 60 * 1000});
-      res.cookie("access_token",access_token,{maxAge: 60 * 60 * 1000});
-      return access_token
-    }
+    const access_token = this.authService.login(user).access_token;
+    this.redis.set(access_token,JSON.stringify(user))
+    this.redis.expire(access_token,60*60)
+    res.cookie("access_token",access_token,{maxAge: 60 * 60 * 1000});
+    return access_token
+  }
     
-    @Public()
-    @Get('logout')
-    logout(@Res({passthrough:true}) res:Response){
-      res.clearCookie("access_token");
-      return true
-    }
+  @Public()
+  @Get('logout')
+  logout(@Res({passthrough:true}) res:Response,@Req() req: Request){
+    this.redis.del(req.headers.authorization.replace('Bearer ',''))
+    res.clearCookie("access_token");
+    return true
+  }
 
-    // @Public()
-    @Get('profile')
-    @Roles(Role.Admin)
-    getProfile(@Req() req) {
-      return req.user;
-    }
+  // @Public()
+  @Get('profile')
+  @Roles(Role.Admin)
+  getProfile(@Req() req) {
+    return req.user;
+  }
 
-    @Roles(Role.Admin)
-    @Get('getUsersList/:usersFilter')
-    getUsersList( @Param('usersFilter') usersFilter:string){
-      return this.userService.getUsersList(usersFilter)
-    }
+  @Roles(Role.Admin)
+  @Get('getUsersList/:usersFilter')
+  getUsersList( @Param('usersFilter') usersFilter:string){
+    return this.userService.getUsersList(usersFilter)
+  }
 
-    @Public()
-    @Post('forgotPassword')
-    sendOtpServices(@Req() req){
-      return this.otpService.sendOTP(req.body.email)
-    }
+  @Public()
+  @Post('forgotPassword')
+  sendOtpServices(@Req() req){
+    return this.otpService.sendOTP(req.body.email)
+  }
 
-    @Public()
-    @Post('resetPassword')
-    setNewPassword(@Body() resetPassword: ResetPassword){
-      return this.userService.setNewPassword(resetPassword)
-    }
+  @Public()
+  @Post('resetPassword')
+  setNewPassword(@Body() resetPassword: ResetPassword){
+    return this.userService.setNewPassword(resetPassword)
+  }
 
-    @Public()
-    @Post('signUp')
-    signUp(@Body() newUser: NewUser){
-      return this.userService.createNewUser(newUser);
-    }
-    
-    @Roles(Role.Admin)
-    @Put('updateUserRole')
-    updateUserRole(@Body() newRole){
-      return this.userService.updateUserRole(newRole)
-    }
+  @Public()
+  @Post('signUp')
+  signUp(@Body() newUser: NewUser){
+    return this.userService.createNewUser(newUser);
+  }
+  
+  @Roles(Role.Admin)
+  @Put('updateUserRole')
+  updateUserRole(@Body() newRole){
+    return this.userService.updateUserRole(newRole)
+  }
 }

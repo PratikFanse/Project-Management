@@ -18,7 +18,6 @@ export class OTPService {
             const userToken = await this.usersService.encrypt(user.email)
             this.redis.set(userToken,OTP)
             this.redis.expire(userToken,60*5)
-            console.log(userToken)
            try{
                 await this.mailService.sendOTP(user.email, OTP)
             } catch(e){
@@ -32,7 +31,6 @@ export class OTPService {
 
     async validateOTP(userToken: string, otp: number):Promise<Boolean> {
         const userOtp = await this.redis.get(userToken)
-        console.log(userOtp)
         if(userOtp && userOtp === userOtp){
             this.redis.del(userToken)
             return true;

@@ -7,7 +7,10 @@ export class RedisConnection{
     }
     async connectRedis(){
         if(!this.client){
-            this.client = createClient();
+            this.client = createClient({
+                // name:process.env.REDIS_NAME,
+                // password:process.env.REDIS_PASSWORD
+            })
             await this.client.connect();
         }
     }
