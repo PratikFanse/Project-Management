@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkProject_Management=self.webpackChunkProject_Management||[]).push([[321],{8321:function(e,t,n){n.r(t),n.d(t,{default:function(){return a}});var c=n(6729),r=n(184);function a(){return(0,r.jsx)("div",{style:{textAlign:"center",background:"#f2f2f2",height:"100vh"},children:(0,r.jsx)("img",{style:{margin:"auto"},src:c})})}},6729:function(e,t,n){e.exports=n.p+"static/media/404.aec0ec7164b9b491f300.webp"}}]);
+//# sourceMappingURL=321.8810d5b1.chunk.js.map
