@@ -163,7 +163,7 @@ export class TaskService {
     @Cron('0 0 5 * * *')
     async setTasksInRedis(){
         const taskList:Task[] = await this.Task.find().populate('project', 'title', 'Project').sort({endDate: 1}).exec() as Task[]
-        // await this.redis.del(await this.redis.keys('task_*'))
+        await this.redis.del(await this.redis.keys('task_*'))
         taskList.map(async (task)=>{
             if(task.isPersonal)
                 await this.redis.set('task_personal_'+task.transission+"_"+task.id,JSON.stringify(task))
