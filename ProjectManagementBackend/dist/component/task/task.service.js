@@ -101,8 +101,8 @@ let TaskService = class TaskService {
                 }
             }
             else {
-                const searchCondition = task.project && task.owner && ((projectId && task.project === projectId) || projectId === 'null' && projects.includes(task.project._id));
-                if ((category !== "isPersonal" && searchCondition) || isPersonal) {
+                const searchCondition = task.project && task.owner && ((projectId && task.project._id === projectId) || projectId === 'null' && projects.includes(task.project._id));
+                if ((category !== "isPersonal" && searchCondition) || projectId === 'null' && isPersonal) {
                     taskList.push(task);
                 }
             }
