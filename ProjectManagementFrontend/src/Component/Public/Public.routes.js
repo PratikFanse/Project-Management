@@ -8,7 +8,6 @@ const ForgotPassword = React.lazy(()=> import('./ForgotPassword/ForgotPassword')
 const ResetPassword = React.lazy(()=> import('./ResetPassword/ResetPassword'));
 export default function PublicRoutes(props){
     const currentRoute = useLocation().pathname
-    console.log(currentRoute)
     const routes = ['/','/login','/signup','/forgotPassword','/resetPassword']
     return(
         <React.Suspense fallback={<Loader/>}>

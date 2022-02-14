@@ -163,7 +163,9 @@ export class TaskService {
     @Cron('0 0 5 * * *')
     async setTasksInRedis(){
         const taskList:Task[] = await this.Task.find().populate('project', 'title', 'Project').sort({endDate: 1}).exec() as Task[]
-        await this.redis.del(await this.redis.keys('task_*'))
+        const taskKey= await this.redis.keys('task_*')
+        if(taskKey.length)
+            await this.redis.del(taskKey)
         taskList.map(async (task)=>{
             if(task.isPersonal)
                 await this.redis.set('task_personal_'+task.transission+"_"+task.id,JSON.stringify(task))
@@ -175,7 +177,9 @@ export class TaskService {
 
     async redisTaskUpdateById(taskId) {
         const task = await this.Task.findById(taskId).populate('project', 'title', 'Project').exec() as Task
-        await this.redis.del(await this.redis.keys('task_*'+task.id,JSON.stringify(task)))
+        const taskKey= await this.redis.keys('task_*'+task.id,JSON.stringify(task))
+        if(taskKey.length)
+            await this.redis.del(taskKey)
         if(task.isPersonal)
             await this.redis.set('task_personal_'+task.transission+"_"+task.id,JSON.stringify(task))
         else

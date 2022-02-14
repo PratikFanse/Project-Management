@@ -96,6 +96,14 @@ export default function Tasks(props){
                     <h2>Pending</h2>
                 </Grid>
             </Grid>
+            <Grid className="header-row" container spacing={2}>
+              <Grid className="list-header" item xs={2}>Task Name</Grid>
+              <Grid className="list-header" item xs={3}>Project/Personal</Grid>
+              {/* <Grid className="list-header" item xs={1}></Grid> */}
+              <Grid className="list-header" item xs={2}>Start Date</Grid>
+              <Grid className="list-header" item xs={2}>End Date</Grid>
+              <Grid className="list-header task-status-header" item xs={3}>Status</Grid>
+            </Grid>
             <Grid className="taskList" item xs={12}>
                 { taskList.length?
                   taskList.map((task)=>(
@@ -129,22 +137,23 @@ export default function Tasks(props){
                           <ListItemText> 
                             <Grid container spacing={1}>
                               <Grid item xs={2}>
-                                <Typography variant="inherit" noWrap>
+                                <Typography sx={{mt:'5px'}} variant="inherit" noWrap>
                                   {task.title}
                                 </Typography>
                               </Grid>
-                              <Grid item xs={4}>
+                              <Grid sx={{textAlign:"center"}} item xs={3}>
                                 {
                                 task.project?
-                                <Typography variant="inherit" noWrap>  
-                                    <b>Project: </b>{task.project.title}
+                                <Typography sx={{mt:'5px'}} variant="inherit" noWrap>  
+                                  {task.project.title}
                                 </Typography>
-                                :<Typography variant="inherit">  
+                                :<Typography sx={{mt:'5px'}} variant="inherit">  
                                   <b>Own task</b>
                                 </Typography>
                                 }
                               </Grid>
-                              <Grid className="taskDate" item xs={3}><b>Start:</b> {moment(task.startDate).format('MMM-DD-YYYY')} <b>End:</b> {moment(task.endDate).format('MMM-DD-YYYY')}</Grid>
+                              <Grid className="taskDate" sx={{mt:'5px'}} item xs={2}>{moment(task.startDate).format('MMM-DD-YYYY')}</Grid>
+                              <Grid className="taskDate" sx={{mt:'5px'}} item xs={2}>{moment(task.endDate).format('MMM-DD-YYYY')}</Grid>
                               <Grid sx={{textAlign:'right'}} item xs={3}>
                                 {
                                   moment(task.endDate).isBefore(moment(),'date')?

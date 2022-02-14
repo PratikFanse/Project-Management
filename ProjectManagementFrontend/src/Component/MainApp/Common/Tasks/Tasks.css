@@ -12,9 +12,11 @@
     top:-56px
 }
 .taskCategory, .userCategory{
+    overflow: hidden;
+    color: white;
     margin: auto;
     text-align: center;
-    background: #dcdcdc94;
+    background: #282c34;
     border-radius: 12px 12px 0 0;
 }
 .taskList{
@@ -23,7 +25,8 @@
     overflow: overlay !important;
 }
 .activeTaskList{
-    background: white;
+    box-shadow: 0px 0px 10px 0px black;
+    background: #282c34;
     border-radius: 12px 12px 0 0;
 }
 .taskCategory div{
@@ -55,10 +58,29 @@
     background-color: #5cb85c73;
 }
 .taskDate{
+    text-align: center !important;
     font-size: 15px;
 }
 .noFound{
     color: #555555;
     text-align: center;
     margin-top: 200px;
+}
+.list-header{
+    color: black;
+    font-weight: 600;
+    text-align: center;
+    padding: 15px 0 !important;
+    overflow: hidden;
+}
+.header-row{
+    padding: 0 103px 0 64px;
+    margin-top: 0px;
+    z-index: 99;
+    width: auto;
+    background-color: gainsboro;
+    margin-left: 0px !important;
+}
+.task-status-header{
+    padding-left: 30px !important;
 }
