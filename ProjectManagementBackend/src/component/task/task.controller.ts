@@ -34,15 +34,15 @@ export class TaskController {
         return this.taskService.getTaskById(req.headers.authorization, id)
     }
 
-    @Put('nextTransission/:taskId')
-    nextTransission(@Req() req, @Param('taskId') taskId: string){
-        return this.taskService.nextTransission(req.headers.authorization, taskId)
+    @Put('nextTrasition/:taskId')
+    nextTrasition(@Req() req, @Param('taskId') taskId: string){
+        return this.taskService.nextTrasition(req.headers.authorization, taskId)
     }
 
     @Roles(Role.QA)
-    @Put('changeTransission')
-    changeTransission(@Body() task){
-        return this.taskService.changeTransission(task)
+    @Put('changeTrasition')
+    changeTrasition(@Body() task){
+        return this.taskService.changeTrasition(task)
     }
 
     @Delete('deleteTask/:taskId')

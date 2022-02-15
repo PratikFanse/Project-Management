@@ -194,14 +194,14 @@ export default function AddOrEditProject(props){
 
             <Grid item xs={12}>
                 <FormControl className="selectMembers" sx={{mt:1,width: '100%' }}>
-                    <InputLabel id="multiple-member-label">Chip</InputLabel>
+                    <InputLabel id="multiple-member-label">Members</InputLabel>
                     <Select
                       labelId="multiple-member-label"
                       id="multiple-member"
                       multiple
                       value={project.members}
                       onChange={handleChange}
-                      input={<OutlinedInput id="select-multiple-member" label="Chip" />}
+                      input={<OutlinedInput id="select-multiple-member" label="Members" />}
                       renderValue={(selected) => selectedMembers(selected)}
                       MenuProps={MenuProps}
                     >

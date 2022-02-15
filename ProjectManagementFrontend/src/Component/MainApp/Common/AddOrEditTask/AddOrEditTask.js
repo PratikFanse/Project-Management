@@ -153,8 +153,8 @@ export default function AddOrEditTask(props){
         setValidations({...validations, isAttempted:true})
       }
   }
-  const changeTransission=(transission)=>{
-    axios.put('/task/changeTransission',{transission:transission,taskId:task._id}).then(()=>{
+  const changeTrasition=(trasition)=>{
+    axios.put('/task/changeTrasition',{trasition:trasition,taskId:task._id}).then(()=>{
       props.reRenderTask('')
       props.reRenderTask('allTask')
       props.handleClose()
@@ -299,25 +299,25 @@ export default function AddOrEditTask(props){
           {
             isEditTask && (userInfo.role!=='employee' || (userInfo.role==='employee' && task.isPersonal))
               ?<Box sx={{ width: '100%', my: 4 }}>
-                <Stepper nonLinear activeStep={steps.indexOf(task.transission)} alternativeLabel >
-                    <Step key='TODO' active={steps.indexOf(task.transission)===0} >
-                      <StepButton color="inherit" onClick={()=>changeTransission('todo')}>
-                        <StepLabel className={steps.indexOf(task.transission)===0?'activeStep':''} StepIconComponent={()=><AssignmentIcon/>}>TODO</StepLabel>
+                <Stepper nonLinear activeStep={steps.indexOf(task.trasition)} alternativeLabel >
+                    <Step key='TODO' active={steps.indexOf(task.trasition)===0} >
+                      <StepButton color="inherit" onClick={()=>changeTrasition('todo')}>
+                        <StepLabel className={steps.indexOf(task.trasition)===0?'activeStep':''} StepIconComponent={()=><AssignmentIcon/>}>TODO</StepLabel>
                       </StepButton>
                     </Step>
-                    <Step key='INPROGRESS' active={steps.indexOf(task.transission)===1}>
-                      <StepButton color="inherit" onClick={()=>changeTransission('inprogress')}>
-                        <StepLabel className={steps.indexOf(task.transission)===1?'activeStep':''} StepIconComponent={()=><ModelTrainingIcon/>}>INPROGRESS</StepLabel>
+                    <Step key='INPROGRESS' active={steps.indexOf(task.trasition)===1}>
+                      <StepButton color="inherit" onClick={()=>changeTrasition('inprogress')}>
+                        <StepLabel className={steps.indexOf(task.trasition)===1?'activeStep':''} StepIconComponent={()=><ModelTrainingIcon/>}>INPROGRESS</StepLabel>
                       </StepButton>
                     </Step>
-                    <Step key='RREVIEW' active={steps.indexOf(task.transission)===2}>
-                      <StepButton color="inherit" onClick={()=>changeTransission('review')}>
-                        <StepLabel className={steps.indexOf(task.transission)===2?'activeStep':''} StepIconComponent={()=><ManageSearchIcon/>}>REVIEW</StepLabel>
+                    <Step key='RREVIEW' active={steps.indexOf(task.trasition)===2}>
+                      <StepButton color="inherit" onClick={()=>changeTrasition('review')}>
+                        <StepLabel className={steps.indexOf(task.trasition)===2?'activeStep':''} StepIconComponent={()=><ManageSearchIcon/>}>REVIEW</StepLabel>
                       </StepButton>
                     </Step>
-                    <Step key='COMPLETED' active={steps.indexOf(task.transission)===3}>
-                      <StepButton disabled={false} color="inherit" onClick={()=>changeTransission('completed')}>
-                        <StepLabel className={steps.indexOf(task.transission)===3?'activeStep':''} StepIconComponent={()=><CheckCircleOutlineRoundedIcon/>}>COMPLETED</StepLabel>
+                    <Step key='COMPLETED' active={steps.indexOf(task.trasition)===3}>
+                      <StepButton disabled={false} color="inherit" onClick={()=>changeTrasition('completed')}>
+                        <StepLabel className={steps.indexOf(task.trasition)===3?'activeStep':''} StepIconComponent={()=><CheckCircleOutlineRoundedIcon/>}>COMPLETED</StepLabel>
                       </StepButton>
                     </Step>
                 </Stepper>

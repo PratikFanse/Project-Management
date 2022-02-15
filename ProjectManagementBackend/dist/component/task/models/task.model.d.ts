@@ -10,6 +10,6 @@ export interface Task {
     owner: User;
     project: Project;
     isPersonal: boolean;
-    transission: string;
+    trasition: string;
     createdBy: User;
 }

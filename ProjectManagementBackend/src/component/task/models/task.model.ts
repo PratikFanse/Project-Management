@@ -10,7 +10,7 @@ export const TaskScema = new mongoose.Schema({
     owner:{type:Object, ref:'User'},
     isPersonal:{type:Boolean, default:true},
     project:{type:Object, ref:'Project'},
-    transission:{type:String, enum:['todo','inprogress','review','completed'], default:'todo'},
+    trasition:{type:String, enum:['todo','inprogress','review','completed'], default:'todo'},
     isActive: {type:Boolean, default:true},
     deletedAt:Date,
     createdBy:{type:Object, ref:'User'},
@@ -25,6 +25,6 @@ export interface Task{
     owner: User;
     project: Project;
     isPersonal: boolean;
-    transission:string;
+    trasition:string;
     createdBy:User;
 }

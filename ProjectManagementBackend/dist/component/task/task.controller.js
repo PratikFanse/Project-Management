@@ -36,11 +36,11 @@ let TaskController = class TaskController {
     getTaskById(req, id) {
         return this.taskService.getTaskById(req.headers.authorization, id);
     }
-    nextTransission(req, taskId) {
-        return this.taskService.nextTransission(req.headers.authorization, taskId);
+    nextTrasition(req, taskId) {
+        return this.taskService.nextTrasition(req.headers.authorization, taskId);
     }
-    changeTransission(task) {
-        return this.taskService.changeTransission(task);
+    changeTrasition(task) {
+        return this.taskService.changeTrasition(task);
     }
     deleteTask(taskId, req) {
         return this.taskService.deleteTask(taskId, req.headers.authorization);
@@ -88,21 +88,21 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], TaskController.prototype, "getTaskById", null);
 __decorate([
-    (0, common_1.Put)('nextTransission/:taskId'),
+    (0, common_1.Put)('nextTrasition/:taskId'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)('taskId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
-], TaskController.prototype, "nextTransission", null);
+], TaskController.prototype, "nextTrasition", null);
 __decorate([
     (0, roles_decorator_1.Roles)(role_enum_1.Role.QA),
-    (0, common_1.Put)('changeTransission'),
+    (0, common_1.Put)('changeTrasition'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
-], TaskController.prototype, "changeTransission", null);
+], TaskController.prototype, "changeTrasition", null);
 __decorate([
     (0, common_1.Delete)('deleteTask/:taskId'),
     __param(0, (0, common_1.Param)('taskId')),

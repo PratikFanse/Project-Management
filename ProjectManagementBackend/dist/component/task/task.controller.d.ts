@@ -8,7 +8,7 @@ export declare class TaskController {
     getAllTask(req: any, projectId: string): Promise<any[]>;
     getTaskListByCategory(req: any, category: string, projectId: string): Promise<any[]>;
     getTaskById(req: any, id: string): Promise<any>;
-    nextTransission(req: any, taskId: string): Promise<void>;
-    changeTransission(task: any): Promise<void>;
+    nextTrasition(req: any, taskId: string): Promise<void>;
+    changeTrasition(task: any): Promise<void>;
     deleteTask(taskId: string, req: any): Promise<void>;
 }

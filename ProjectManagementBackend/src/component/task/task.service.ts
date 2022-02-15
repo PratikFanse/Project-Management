@@ -125,8 +125,8 @@ export class TaskService {
             throw new NotFoundException();
     }
 
-    async nextTransission(userToken: any, taskId: string) {
-        const transission = ['todo','inprogress','review','completed'];
+    async nextTrasition(userToken: any, taskId: string) {
+        const trasition = ['todo','inprogress','review','completed'];
         const user = JSON.parse(await this.redis.get(userToken.replace('Bearer ','')));
         let query ={}
         if(user.role==Role.Admin){
@@ -138,16 +138,16 @@ export class TaskService {
             query= {_id:taskId, $or:[{createdBy: user.id},{owner:user.id}]}
         }
         const task = await this.Task.findOne(query).exec();
-        if(task.transission!=='completed'){
-            task.transission = transission[transission.indexOf(task.transission)+1];
+        if(task.trasition!=='completed'){
+            task.trasition = trasition[trasition.indexOf(task.trasition)+1];
             await task.save();
             await this.redisTaskUpdateById(taskId)
         }
     }
 
-    async changeTransission(taskTransission) {
-        await this.Task.updateOne({_id:taskTransission.taskId},{$set:{transission:taskTransission.transission}});
-        await this.redisTaskUpdateById(taskTransission.taskId)
+    async changeTrasition(taskTrasition) {
+        await this.Task.updateOne({_id:taskTrasition.taskId},{$set:{trasition:taskTrasition.trasition}});
+        await this.redisTaskUpdateById(taskTrasition.taskId)
     }
 
     async deleteTask(taskId, userToken) {
@@ -168,9 +168,9 @@ export class TaskService {
             await this.redis.del(taskKey)
         taskList.map(async (task)=>{
             if(task.isPersonal)
-                await this.redis.set('task_personal_'+task.transission+"_"+task.id,JSON.stringify(task))
+                await this.redis.set('task_personal_'+task.trasition+"_"+task.id,JSON.stringify(task))
             else
-                await this.redis.set('task_'+task.transission+"_"+task.id,JSON.stringify(task))
+                await this.redis.set('task_'+task.trasition+"_"+task.id,JSON.stringify(task))
             // await this.redis.set('task_'+task.id,JSON.stringify(task))
         })
     }
@@ -181,9 +181,9 @@ export class TaskService {
         if(taskKey.length)
             await this.redis.del(taskKey)
         if(task.isPersonal)
-            await this.redis.set('task_personal_'+task.transission+"_"+task.id,JSON.stringify(task))
+            await this.redis.set('task_personal_'+task.trasition+"_"+task.id,JSON.stringify(task))
         else
-            await this.redis.set('task_'+task.transission+"_"+task.id,JSON.stringify(task))
+            await this.redis.set('task_'+task.trasition+"_"+task.id,JSON.stringify(task))
     }
 
 }

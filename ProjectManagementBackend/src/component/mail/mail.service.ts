@@ -11,7 +11,7 @@ export class MailService {
             html: `
                 <h3>Project Management</h3>
                 <p>
-                    Your OTP for forfot password:<b>${otp}</b>
+                    Your OTP for forgot password:<b>${otp}</b>
                 </p>
                 `
         });

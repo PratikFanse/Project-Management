@@ -11,8 +11,8 @@ export declare class TaskService {
     getTaskListByCategory(userToken: any, category: String, projectId: any): Promise<any[]>;
     getByCategory(category: any, role: any, userId: any, projectId: any): Promise<any[]>;
     getTaskById(userToken: any, taskId: any): Promise<any>;
-    nextTransission(userToken: any, taskId: string): Promise<void>;
-    changeTransission(taskTransission: any): Promise<void>;
+    nextTrasition(userToken: any, taskId: string): Promise<void>;
+    changeTrasition(taskTrasition: any): Promise<void>;
     deleteTask(taskId: any, userToken: any): Promise<void>;
     setTasksInRedis(): Promise<void>;
     redisTaskUpdateById(taskId: any): Promise<void>;

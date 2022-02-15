@@ -62,14 +62,14 @@ export default function Tasks(props){
         })
       }
     },[taskCategory,dataToggler])
-    const nextTransission=(taskId)=>{
-      if(window.confirm('Do you realy want to change transission of this task?'))
-      axios.put('/task/nextTransission/'+taskId).then(()=>{
+    const nextTrasition=(taskId)=>{
+      if(window.confirm('Do you really want to change trasition of this task?'))
+      axios.put('/task/nextTrasition/'+taskId).then(()=>{
         setDataToggler(!dataToggler)
       })
     }
     const deleteTask=(taskId)=>{
-      if(window.confirm('Do you realy want to delete this task?'))
+      if(window.confirm('Do you really want to delete this task?'))
       axios.delete('/task/deleteTask/'+taskId).then(()=>{
         setDataToggler(!dataToggler)
       })
@@ -110,9 +110,9 @@ export default function Tasks(props){
                     <ListItem key={task._id}
                       secondaryAction={
                         <div>
-                        <Tooltip title="Next Transission" placement="top">
+                        <Tooltip title="Next Trasition" placement="top">
                           <span>
-                            <IconButton sx={{mr:'-5px'}} edge="end" onClick={()=>nextTransission(task._id)} disabled={task.transission==='completed'} label='changeTransission' aria-label="Transission">
+                            <IconButton sx={{mr:'-5px'}} edge="end" onClick={()=>nextTrasition(task._id)} disabled={task.trasition==='completed'} label='changeTrasition' aria-label="Trasition">
                               <PublishedWithChangesIcon/>
                             </IconButton>
                           </span>
@@ -121,7 +121,7 @@ export default function Tasks(props){
                           <span>
                             <IconButton sx={{mr:1}} edge="end" onClick={()=>deleteTask(task._id)} 
                             disabled={!(task.isPersonal || userInfo && (userInfo.role==='admin' || userInfo.role==='manager'))} 
-                            label='changeTransission' aria-label="Transission">
+                            label='changeTrasition' aria-label="Trasition">
                               <DeleteOutlineRoundedIcon/>
                             </IconButton>
                           </span>
@@ -169,8 +169,8 @@ export default function Tasks(props){
                                 <ListItemText className="taskState">
                                   <Chip
                                     sx={{textTransform: "uppercase"}}
-                                    className={task.transission}
-                                    label={task.transission}
+                                    className={task.trasition}
+                                    label={task.trasition}
                                     size="small"/>
                                 </ListItemText>  
                               </Grid>

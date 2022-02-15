@@ -9,18 +9,18 @@ export default function PublicApp(props){
     const currentRoute = useLocation().pathname
     const publicRoutes=['/','/login','/signup','/forgotPassword','/resetPassword'];
     const [open, setOpen] = React.useState(false);
-    const [transission, setTransission] = React.useState(undefined);
+    const [trasition, setTrasition] = React.useState(undefined);
     const [notifyText, setNotifyText] = React.useState('')
  
     const otpSent = () => {
         setNotifyText('OTP sent successfully!')
-        setTransission(() => TransissionUp);
+        setTrasition(() => TrasitionUp);
         setOpen(true);
     };
 
     const passwordChanged = () => {
         setNotifyText('Your password is reset!')
-        setTransission(() => TransissionUp);
+        setTrasition(() => TrasitionUp);
         setOpen(true);
     };
     return(
@@ -40,10 +40,10 @@ export default function PublicApp(props){
                     <Grid item xs={2}></Grid>
                     <Snackbar
                       open={open}
-                      TransissionComponent={transission}
+                      TrasitionComponent={trasition}
                       autoHideDuration={6000}
                       onClose={()=>setOpen(false)}
-                      key={transission ? transission.name : ''}>
+                      key={trasition ? trasition.name : ''}>
                         <Alert  onClose={()=>setOpen(false)} severity="success" sx={{ width: '100%' }}>
                             {notifyText}
                         </Alert>
@@ -55,6 +55,6 @@ export default function PublicApp(props){
         </Suspense>
     )
 }
-function TransissionUp(props) {
+function TrasitionUp(props) {
     return <Slide {...props} direction="up" />;
 }
