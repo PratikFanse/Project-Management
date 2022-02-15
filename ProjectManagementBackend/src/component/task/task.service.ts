@@ -85,7 +85,7 @@ export class TaskService {
                 } else if(!projectId || projectId==='null') {
                     if(role!==Role.Admin && (category!=="isPersonal" && task.project && projects.includes(task.project._id)) || isPersonal){
                         taskList.push(task);
-                    } else if((isPersonal || (category!=="isPersonal" && !task.isPersonal)))
+                    } else if(role===Role.Admin && (isPersonal || (category!=="isPersonal" && !task.isPersonal)))
                         taskList.push(task);
                 } 
             } else {

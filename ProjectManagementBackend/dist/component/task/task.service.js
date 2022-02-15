@@ -96,7 +96,7 @@ let TaskService = class TaskService {
                     if (role !== role_enum_1.Role.Admin && (category !== "isPersonal" && task.project && projects.includes(task.project._id)) || isPersonal) {
                         taskList.push(task);
                     }
-                    else if ((isPersonal || (category !== "isPersonal" && !task.isPersonal)))
+                    else if (role === role_enum_1.Role.Admin && (isPersonal || (category !== "isPersonal" && !task.isPersonal)))
                         taskList.push(task);
                 }
             }
