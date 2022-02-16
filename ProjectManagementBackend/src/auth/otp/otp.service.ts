@@ -16,8 +16,8 @@ export class OTPService {
        if(user){
             const OTP = Math.floor(100000 + Math.random()*900000);
             const userToken = await this.usersService.encrypt(user.email)
-            this.redis.set(userToken,OTP)
-            this.redis.expire(userToken,60*5)
+            this.redis.set('otp_'+userToken,OTP)
+            this.redis.expire('otp_'+userToken,60*5)
            try{
                 await this.mailService.sendOTP(user.email, OTP)
             } catch(e){
@@ -30,9 +30,9 @@ export class OTPService {
     }
 
     async validateOTP(userToken: string, otp: number):Promise<Boolean> {
-        const userOtp = await this.redis.get(userToken)
+        const userOtp = await this.redis.get('otp_'+userToken)
         if(userOtp && userOtp === userOtp){
-            this.redis.del(userToken)
+            this.redis.del('otp_'+userToken)
             return true;
         } else{
             throw new NotFoundException()
