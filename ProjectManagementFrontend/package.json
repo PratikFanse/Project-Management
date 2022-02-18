@@ -16,6 +16,8 @@
     "@mui/lab": "^5.0.0-alpha.65",
     "@mui/material": "^5.2.7",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
+    "@sentry/react": "^6.17.9",
+    "@sentry/tracing": "^6.17.9",
     "@svgr/webpack": "^6.2.1",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",

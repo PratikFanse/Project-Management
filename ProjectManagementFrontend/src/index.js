@@ -6,6 +6,14 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
 import axios from "axios";
 import cookie from 'js-cookie';
+import * as Sentry from "@sentry/react";
+import { BrowserTracing } from "@sentry/tracing";
+
+Sentry.init({
+  dsn: "https://665b8276397e4380943d9fc7a58b5db4@o1146959.ingest.sentry.io/6216631",
+  integrations: [new BrowserTracing()],
+  tracesSampleRate: 1.0,
+});
 
 axios.interceptors.request.use(function(request){
     const token = cookie.get('access_token');
