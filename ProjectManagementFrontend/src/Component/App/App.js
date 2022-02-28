@@ -2,6 +2,7 @@ import './App.css';
 import cookie from 'js-cookie';
 import * as React from 'react';
 import Loader from '../Common/loader';
+import * as Sentry from "@sentry/react";
 const PublicApp = React.lazy(() => import('../Public/Public.app'));
 const MainApp = React.lazy(() => import('../MainApp/Main.app'));
 function App() {
@@ -16,12 +17,14 @@ function App() {
   
   return (
 
+    <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>            
     <React.Suspense fallback={<Loader/>}>
-    <div className="App">
-      {renderApp}
-    </div>
+        <div className="App">
+          {renderApp}
+        </div>
     </React.Suspense>
+    </Sentry.ErrorBoundary>
   );
 }
 
-export default App;
+export default Sentry.withProfiler(App);
