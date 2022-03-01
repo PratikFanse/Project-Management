@@ -130,7 +130,7 @@ export default function Tasks(props){
                       }
                     >
                       <Tooltip title="Edit Task" placement="top">
-                        <ListItemButton className="itemButton" onClick={()=>handleOpen(true, task._id)} sx={{pl:1,mr:"0"}}>
+                        <ListItemButton className="itemButton" onClick={()=>handle(true, task._id)} sx={{pl:1,mr:"0"}}>
                           <ListItemIcon sx={{minWidth:"40px"}}>
                             <EditIcon/>
                           </ListItemIcon>
