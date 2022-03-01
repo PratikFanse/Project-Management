@@ -16,14 +16,13 @@ function App() {
     },[])
   
   return (
-
-    <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>            
     <React.Suspense fallback={<Loader/>}>
-        <div className="App">
-          {renderApp}
-        </div>
+      <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>            
+          <div className="App">
+            {renderApp}
+          </div>
+      </Sentry.ErrorBoundary>
     </React.Suspense>
-    </Sentry.ErrorBoundary>
   );
 }
 

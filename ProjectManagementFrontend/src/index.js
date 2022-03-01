@@ -13,7 +13,8 @@ Sentry.init({
   dsn: "https://665b8276397e4380943d9fc7a58b5db4@o1146959.ingest.sentry.io/6216631",
   integrations: [new BrowserTracing()],
   tracesSampleRate: 1.0,
-  release: "ProjectManagement@v0.0.1",
+  release: "4b15c5c059b2431893e3a69624dcdddb80295c67",
+  environment: 'dev'
 });
 
 axios.interceptors.request.use(function(request){

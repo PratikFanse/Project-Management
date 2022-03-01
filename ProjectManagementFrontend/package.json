@@ -16,6 +16,7 @@
     "@mui/lab": "^5.0.0-alpha.65",
     "@mui/material": "^5.2.7",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
+    "@sentry/cli": "^1.73.0",
     "@sentry/react": "^6.17.9",
     "@sentry/tracing": "^6.17.9",
     "@svgr/webpack": "^6.2.1",
@@ -86,7 +87,8 @@
     "test": "node scripts/test.js",
     "build:dev": "env-cmd -f .env.dev npm run-script build",
     "build:staging": "env-cmd -f .env.staging npm run-script build",
-    "build:prod": "env-cmd -f .env.prod npm run-script build"
+    "build:prod": "env-cmd -f .env.prod npm run-script build",
+    "deploy":"make"
   },
   "eslintConfig": {
     "extends": [
