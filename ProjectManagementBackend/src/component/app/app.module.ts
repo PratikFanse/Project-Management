@@ -14,7 +14,8 @@ import { ProjectModule } from '../project/project.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ScheduleModule } from '@nestjs/schedule';
-
+import { SentryModule } from '@ntegral/nestjs-sentry';
+// import { LogLevel } from '@sentry/types';
 @Module({
   imports: [ 
     ConfigModule.forRoot(),
@@ -24,6 +25,15 @@ import { ScheduleModule } from '@nestjs/schedule';
     ScheduleModule.forRoot(),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'build'),
+    }),
+    SentryModule.forRoot({
+      dsn:'https://f77c1355746b433aa3e830e0129c1e20@o1146959.ingest.sentry.io/6237472',
+      // dsn: 'https://665b8276397e4380943d9fc7a58b5db4@o1146959.ingest.sentry.io/6216631',
+      debug: true,
+      attachStacktrace:true,
+      environment: 'dev',
+      release: 'aea134b27bc8e3a8a6ca34e8a410e4ac86284686' // must create a release in sentry.io dashboard
+      // logLevel: LogLevel.Debug //based on sentry.io loglevel //
     })
    ],
   controllers: [AppController],

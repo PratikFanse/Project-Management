@@ -3,8 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./component/app/app.module");
 const cookieParser = require("cookie-parser");
+const nestjs_sentry_1 = require("@ntegral/nestjs-sentry");
 async function bootstrap() {
-    const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    const app = await core_1.NestFactory.create(app_module_1.AppModule, { logger: false });
+    app.useLogger(nestjs_sentry_1.SentryService.SentryServiceInstance());
     app.use(cookieParser());
     app.enableCors({
         credentials: true,

@@ -7,13 +7,23 @@ import { Task } from './models/task.model';
 import { Role } from 'src/auth/role/role.enum';
 import { RedisConnection } from '../redis/redis.model';
 import { Cron } from '@nestjs/schedule';
+import { InjectSentry, SentryService } from '@ntegral/nestjs-sentry';
+import { Severity } from '@sentry/node';
 
 @Injectable()
 export class TaskService {
     private redis = new RedisConnection().getConnection()
     constructor(@InjectModel('Task') private readonly Task: Model<Task>,
     @Inject(forwardRef(() => ProjectService))private projectService: ProjectService,
+    @InjectSentry() private readonly client: SentryService
      ){
+        client.log('TaskService Loaded','test', true); // creates log asBreadcrumb //
+        client.instance().addBreadcrumb({
+            level: Severity.Debug
+            // , message: 'How to use native breadcrumb', data: { context: 'WhatEver'}
+        })
+        client.debug('AppService Debug', 'context');
+        // client.instance().captureException('');
         this.setTasksInRedis()
      }
 
@@ -66,34 +76,38 @@ export class TaskService {
 
     async getByCategory(category, role, userId, projectId){
         let taskKeys = [];
-        if(category=="pending" || category==="allTask")
-            taskKeys = await this.redis.keys("task_*")
-        else if(category==="isPersonal")
-            taskKeys = await this.redis.keys("task_personal_*")
-        else 
-            taskKeys = await this.redis.keys("task_"+category+"*")
         let taskList =[];
-        let projects =[];
-        if(role!==Role.Admin)
-            projects.push(...await this.projectService.userProjects(userId));
-        for(const taskKey of taskKeys) {
-            const task = JSON.parse(await this.redis.get(taskKey))
-            const isPersonal = task.createdBy===userId && task.isPersonal
-            if(role!==Role.Employee){
-                if((task.project && projectId && task.project._id===projectId )){
-                    taskList.push(task);
-                } else if(!projectId || projectId==='null') {
-                    if(role!==Role.Admin && (category!=="isPersonal" && task.project && projects.includes(task.project._id)) || isPersonal){
+        try{
+            if(category=="pending" || category==="allTask")
+                taskKeys = this.redis.keys("task_*")
+            else if(category==="isPersonal")
+                taskKeys = this.redis.keys("task_personal_*")
+            else 
+                taskKeys = this.redis.keys("task_"+category+"*")
+            let projects =[];
+            if(role!==Role.Admin)
+                projects.push(...await this.projectService.userProjects(userId));
+            for(const taskKey of taskKeys) {
+                const task = JSON.parse(await this.redis.get(taskKey))
+                const isPersonal = task.createdBy===userId && task.isPersonal
+                if(role!==Role.Employee){
+                    if((task.project && projectId && task.project._id===projectId )){
                         taskList.push(task);
-                    } else if(role===Role.Admin && (isPersonal || (category!=="isPersonal" && !task.isPersonal)))
-                        taskList.push(task);
-                } 
-            } else {
-                const searchCondition =task.project && task.owner && ((projectId && task.project._id===projectId) || projectId ==='null' && projects.includes(task.project._id))
-                if( (category!=="isPersonal" && searchCondition) || projectId ==='null' && isPersonal){
-                    taskList.push(task)
+                    } else if(!projectId || projectId==='null') {
+                        if(role!==Role.Admin && (category!=="isPersonal" && task.project && projects.includes(task.project._id)) || isPersonal){
+                            taskList.push(task);
+                        } else if(role===Role.Admin && (isPersonal || (category!=="isPersonal" && !task.isPersonal)))
+                            taskList.push(task);
+                    } 
+                } else {
+                    const searchCondition =task.project && task.owner && ((projectId && task.project._id===projectId) || projectId ==='null' && projects.includes(task.project._id))
+                    if( (category!=="isPersonal" && searchCondition) || projectId ==='null' && isPersonal){
+                        taskList.push(task)
+                    }
                 }
             }
+        } catch(e){
+            this.client.instance().captureException(e);
         }
         return taskList
     }

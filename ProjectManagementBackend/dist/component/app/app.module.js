@@ -23,6 +23,7 @@ const project_module_1 = require("../project/project.module");
 const serve_static_1 = require("@nestjs/serve-static");
 const path_1 = require("path");
 const schedule_1 = require("@nestjs/schedule");
+const nestjs_sentry_1 = require("@ntegral/nestjs-sentry");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('*');
@@ -38,6 +39,13 @@ AppModule = __decorate([
             schedule_1.ScheduleModule.forRoot(),
             serve_static_1.ServeStaticModule.forRoot({
                 rootPath: (0, path_1.join)(__dirname, '..', 'build'),
+            }),
+            nestjs_sentry_1.SentryModule.forRoot({
+                dsn: 'https://f77c1355746b433aa3e830e0129c1e20@o1146959.ingest.sentry.io/6237472',
+                debug: true,
+                attachStacktrace: true,
+                environment: 'dev',
+                release: 'aea134b27bc8e3a8a6ca34e8a410e4ac86284686'
             })
         ],
         controllers: [app_controller_1.AppController],

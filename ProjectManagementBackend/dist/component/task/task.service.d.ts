@@ -1,11 +1,13 @@
 import { Model } from 'mongoose';
 import { ProjectService } from '../project/project.service';
 import { Task } from './models/task.model';
+import { SentryService } from '@ntegral/nestjs-sentry';
 export declare class TaskService {
     private readonly Task;
     private projectService;
+    private readonly client;
     private redis;
-    constructor(Task: Model<Task>, projectService: ProjectService);
+    constructor(Task: Model<Task>, projectService: ProjectService, client: SentryService);
     createNewTask(newTask: Task, userToken: any): Promise<void>;
     updateTask(task: any, userToken: any): Promise<void>;
     getTaskListByCategory(userToken: any, category: String, projectId: any): Promise<any[]>;

@@ -21,11 +21,19 @@ const project_service_1 = require("../project/project.service");
 const role_enum_1 = require("../../auth/role/role.enum");
 const redis_model_1 = require("../redis/redis.model");
 const schedule_1 = require("@nestjs/schedule");
+const nestjs_sentry_1 = require("@ntegral/nestjs-sentry");
+const node_1 = require("@sentry/node");
 let TaskService = class TaskService {
-    constructor(Task, projectService) {
+    constructor(Task, projectService, client) {
         this.Task = Task;
         this.projectService = projectService;
+        this.client = client;
         this.redis = new redis_model_1.RedisConnection().getConnection();
+        client.log('TaskService Loaded', 'test', true);
+        client.instance().addBreadcrumb({
+            level: node_1.Severity.Debug
+        });
+        client.debug('AppService Debug', 'context');
         this.setTasksInRedis();
     }
     async createNewTask(newTask, userToken) {
@@ -75,37 +83,42 @@ let TaskService = class TaskService {
     }
     async getByCategory(category, role, userId, projectId) {
         let taskKeys = [];
-        if (category == "pending" || category === "allTask")
-            taskKeys = await this.redis.keys("task_*");
-        else if (category === "isPersonal")
-            taskKeys = await this.redis.keys("task_personal_*");
-        else
-            taskKeys = await this.redis.keys("task_" + category + "*");
         let taskList = [];
-        let projects = [];
-        if (role !== role_enum_1.Role.Admin)
-            projects.push(...await this.projectService.userProjects(userId));
-        for (const taskKey of taskKeys) {
-            const task = JSON.parse(await this.redis.get(taskKey));
-            const isPersonal = task.createdBy === userId && task.isPersonal;
-            if (role !== role_enum_1.Role.Employee) {
-                if ((task.project && projectId && task.project._id === projectId)) {
-                    taskList.push(task);
-                }
-                else if (!projectId || projectId === 'null') {
-                    if (role !== role_enum_1.Role.Admin && (category !== "isPersonal" && task.project && projects.includes(task.project._id)) || isPersonal) {
+        try {
+            if (category == "pending" || category === "allTask")
+                taskKeys = this.redis.keys("task_*");
+            else if (category === "isPersonal")
+                taskKeys = this.redis.keys("task_personal_*");
+            else
+                taskKeys = this.redis.keys("task_" + category + "*");
+            let projects = [];
+            if (role !== role_enum_1.Role.Admin)
+                projects.push(...await this.projectService.userProjects(userId));
+            for (const taskKey of taskKeys) {
+                const task = JSON.parse(await this.redis.get(taskKey));
+                const isPersonal = task.createdBy === userId && task.isPersonal;
+                if (role !== role_enum_1.Role.Employee) {
+                    if ((task.project && projectId && task.project._id === projectId)) {
                         taskList.push(task);
                     }
-                    else if (role === role_enum_1.Role.Admin && (isPersonal || (category !== "isPersonal" && !task.isPersonal)))
+                    else if (!projectId || projectId === 'null') {
+                        if (role !== role_enum_1.Role.Admin && (category !== "isPersonal" && task.project && projects.includes(task.project._id)) || isPersonal) {
+                            taskList.push(task);
+                        }
+                        else if (role === role_enum_1.Role.Admin && (isPersonal || (category !== "isPersonal" && !task.isPersonal)))
+                            taskList.push(task);
+                    }
+                }
+                else {
+                    const searchCondition = task.project && task.owner && ((projectId && task.project._id === projectId) || projectId === 'null' && projects.includes(task.project._id));
+                    if ((category !== "isPersonal" && searchCondition) || projectId === 'null' && isPersonal) {
                         taskList.push(task);
+                    }
                 }
             }
-            else {
-                const searchCondition = task.project && task.owner && ((projectId && task.project._id === projectId) || projectId === 'null' && projects.includes(task.project._id));
-                if ((category !== "isPersonal" && searchCondition) || projectId === 'null' && isPersonal) {
-                    taskList.push(task);
-                }
-            }
+        }
+        catch (e) {
+            this.client.instance().captureException(e);
         }
         return taskList;
     }
@@ -200,8 +213,10 @@ TaskService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)('Task')),
     __param(1, (0, common_1.Inject)((0, common_1.forwardRef)(() => project_service_1.ProjectService))),
+    __param(2, (0, nestjs_sentry_1.InjectSentry)()),
     __metadata("design:paramtypes", [mongoose_2.Model,
-        project_service_1.ProjectService])
+        project_service_1.ProjectService,
+        nestjs_sentry_1.SentryService])
 ], TaskService);
 exports.TaskService = TaskService;
 //# sourceMappingURL=task.service.js.map
