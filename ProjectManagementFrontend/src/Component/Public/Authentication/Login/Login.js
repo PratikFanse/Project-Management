@@ -29,7 +29,7 @@ export default function Login(props){
         }
         setValidation({...validations})
     }
-    const validateUser =(event)=>{
+    const vlidateUser =(event)=>{
         event.preventDefault();
         if(validation.isEmail, validation.isStrongPassword){
             const form = event.target 
